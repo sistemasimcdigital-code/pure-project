@@ -18,8 +18,16 @@ export function Carousel({ title, series }: { title: string; series: Series[] })
           <button onClick={() => scroll(1)} className="grid h-8 w-8 place-items-center rounded-full glass hover:bg-primary/20"><ChevronRight className="h-4 w-4" /></button>
         </div>
       </div>
-      <div ref={ref} className="no-scrollbar flex gap-3 overflow-x-auto scroll-smooth px-4 pb-2 sm:px-8">
-        {series.map((s) => <PosterCard key={s.id} series={s} />)}
+      <div
+        ref={ref}
+        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-4 pb-2 sm:snap-none sm:px-8"
+        style={{ WebkitOverflowScrolling: "touch", overscrollBehaviorX: "contain" }}
+      >
+        {series.map((s) => (
+          <div key={s.id} className="snap-start">
+            <PosterCard series={s} />
+          </div>
+        ))}
       </div>
     </section>
   );
