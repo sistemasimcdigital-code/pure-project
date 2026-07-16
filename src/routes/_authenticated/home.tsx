@@ -56,7 +56,8 @@ function Home() {
   return (
     <div className="-mt-16">
       {featured && <HeroBanner series={featured} />}
-      <div className="relative -mt-24 space-y-6 pb-16">
+      <div className="relative -mt-16 space-y-6 pb-16 sm:-mt-24">
+
         {continueWatching.length > 0 && <Carousel title="Continue Watching" series={continueWatching} />}
         <Carousel title="K-Dramas" series={k} />
         <Carousel title="J-Dramas" series={j} />
