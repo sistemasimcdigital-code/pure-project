@@ -18,7 +18,7 @@ function Home() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("series").select("*").order("created_at", { ascending: false });
-      setSeries((data as Series[]) ?? []);
+      setSeries((data as unknown as Series[]) ?? []);
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
@@ -30,7 +30,7 @@ function Home() {
         const seriesIds = [...new Set((wp ?? []).map((w: any) => w.series_id))];
         if (seriesIds.length) {
           const { data: cw } = await supabase.from("series").select("*").in("id", seriesIds);
-          const map = new Map((cw as Series[] ?? []).map(s => [s.id, s]));
+          const map = new Map((cw as unknown as Series[] ?? []).map(s => [s.id, s]));
           setContinueWatching(seriesIds.map(id => map.get(id)!).filter(Boolean));
         }
       }

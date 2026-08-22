@@ -16,7 +16,7 @@ function SearchPage() {
     const t = setTimeout(async () => {
       const query = supabase.from("series").select("*");
       const { data } = q ? await query.ilike("title", `%${q}%`) : await query.limit(20);
-      setList((data as Series[]) ?? []);
+      setList((data as unknown as Series[]) ?? []);
     }, 200);
     return () => clearTimeout(t);
   }, [q]);

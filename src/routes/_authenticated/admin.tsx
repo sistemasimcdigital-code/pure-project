@@ -23,7 +23,7 @@ function Admin() {
       const { data: r } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
       setIsAdmin(!!r?.some(x => x.role === "admin"));
       const { data: s } = await supabase.from("series").select("*").order("created_at", { ascending: false });
-      setSeries((s as Series[]) ?? []);
+      setSeries((s as unknown as Series[]) ?? []);
     })();
   }, [nav]);
 
@@ -70,9 +70,9 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
     poster_url: "", backdrop_url: "", featured: false, is_dubbed: false, source_platform: "",
   });
   const save = async () => {
-    const { data, error } = await supabase.from("series").insert(form).select().single();
+    const { data, error } = await supabase.from("series").insert(form as any).select().single();
     if (error) return alert(error.message);
-    onChange([data as Series, ...series]);
+    onChange([data as unknown as Series, ...series]);
     setForm({ ...form, title: "", synopsis: "", poster_url: "", backdrop_url: "" });
   };
   const del = async (id: string) => {
