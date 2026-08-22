@@ -23,7 +23,7 @@ function Admin() {
       const { data: r } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
       setIsAdmin(!!r?.some(x => x.role === "admin"));
       const { data: s } = await supabase.from("series").select("*").order("created_at", { ascending: false });
-      setSeries((s as Series[]) ?? []);
+      setSeries((s as unknown as Series[]) ?? []);
     })();
   }, [nav]);
 
@@ -67,12 +67,12 @@ function Admin() {
 function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Series[]) => void }) {
   const [form, setForm] = useState({
     title: "", synopsis: "", type: "kdrama" as DramaType, year: 2025, rating: 8.5,
-    poster_url: "", backdrop_url: "", featured: false,
+    poster_url: "", backdrop_url: "", featured: false, is_dubbed: false, source_platform: "",
   });
   const save = async () => {
-    const { data, error } = await supabase.from("series").insert(form).select().single();
+    const { data, error } = await supabase.from("series").insert(form as any).select().single();
     if (error) return alert(error.message);
-    onChange([data as Series, ...series]);
+    onChange([data as unknown as Series, ...series]);
     setForm({ ...form, title: "", synopsis: "", poster_url: "", backdrop_url: "" });
   };
   const del = async (id: string) => {
@@ -95,7 +95,14 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
           <input placeholder="Poster URL" value={form.poster_url} onChange={e => setForm({ ...form, poster_url: e.target.value })} className="rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm sm:col-span-2" />
           <input placeholder="Backdrop URL" value={form.backdrop_url} onChange={e => setForm({ ...form, backdrop_url: e.target.value })} className="rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm sm:col-span-2" />
           <textarea placeholder="Synopsis" value={form.synopsis} onChange={e => setForm({ ...form, synopsis: e.target.value })} className="rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm sm:col-span-2" rows={3} />
-          <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} /> Featured on hero</label>
+          <div className="flex flex-wrap gap-4 sm:col-span-2">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.featured} onChange={e => setForm({ ...form, featured: e.target.checked })} /> Featured on hero</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_dubbed} onChange={e => setForm({ ...form, is_dubbed: e.target.checked })} /> Audio Dublado (PT-BR)</label>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-xs font-semibold text-white/50">Source Platform (e.g., Netflix)</label>
+            <input placeholder="Source Platform" value={form.source_platform} onChange={e => setForm({ ...form, source_platform: e.target.value })} className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm" />
+          </div>
         </div>
         <button onClick={save} className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold"><Plus className="h-4 w-4" /> Add series</button>
       </div>

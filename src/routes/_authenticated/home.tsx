@@ -18,7 +18,7 @@ function Home() {
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("series").select("*").order("created_at", { ascending: false });
-      setSeries((data as Series[]) ?? []);
+      setSeries((data as unknown as Series[]) ?? []);
 
       const { data: userData } = await supabase.auth.getUser();
       if (userData.user) {
@@ -30,7 +30,7 @@ function Home() {
         const seriesIds = [...new Set((wp ?? []).map((w: any) => w.series_id))];
         if (seriesIds.length) {
           const { data: cw } = await supabase.from("series").select("*").in("id", seriesIds);
-          const map = new Map((cw as Series[] ?? []).map(s => [s.id, s]));
+          const map = new Map((cw as unknown as Series[] ?? []).map(s => [s.id, s]));
           setContinueWatching(seriesIds.map(id => map.get(id)!).filter(Boolean));
         }
       }
@@ -42,6 +42,8 @@ function Home() {
   const k = series.filter(s => s.type === "kdrama");
   const j = series.filter(s => s.type === "jdrama");
   const c = series.filter(s => s.type === "cdrama");
+  const netflixDubbed = series.filter(s => s.source_platform?.toLowerCase() === 'netflix' && s.is_dubbed);
+  const dubbed = series.filter(s => s.is_dubbed);
 
   if (loading) {
     return <div className="grid min-h-[70vh] place-items-center text-white/50">Loading catalog...</div>;
@@ -59,6 +61,8 @@ function Home() {
       <div className="relative -mt-16 space-y-6 pb-16 sm:-mt-24">
 
         {continueWatching.length > 0 && <Carousel title="Continue Watching" series={continueWatching} />}
+        {netflixDubbed.length > 0 && <Carousel title="Populares na Netflix (Dublados)" series={netflixDubbed} />}
+        {dubbed.length > 0 && <Carousel title="Audio Dublado" series={dubbed} />}
         <Carousel title="K-Dramas" series={k} />
         <Carousel title="J-Dramas" series={j} />
         <Carousel title="C-Dramas" series={c} />

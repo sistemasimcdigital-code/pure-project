@@ -23,9 +23,21 @@ export function HeroBanner({ series }: { series: Series }) {
 
       <div className="relative flex h-full items-end px-5 pb-14 sm:items-center sm:px-12 sm:pb-0">
         <div className="max-w-2xl">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-[11px] font-medium sm:text-xs">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
-            Featured · {TYPE_LABEL[series.type]}
+          <div className="mb-3 flex items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-[11px] font-medium sm:text-xs">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+              Featured · {TYPE_LABEL[series.type]}
+            </div>
+            {series.is_dubbed && (
+              <div className="rounded-full bg-primary/20 px-3 py-1 text-[10px] font-bold tracking-wide text-primary backdrop-blur border border-primary/30">
+                AUDIO DUBLADO
+              </div>
+            )}
+            {series.source_platform?.toLowerCase() === 'netflix' && (
+              <div className="rounded-full bg-red-600/20 px-3 py-1 text-[10px] font-bold tracking-wide text-red-500 backdrop-blur border border-red-500/30">
+                NETFLIX
+              </div>
+            )}
           </div>
           <h1
             className="mb-3 text-[2rem] font-black leading-[1.05] tracking-tight sm:mb-4 sm:text-5xl md:text-6xl"

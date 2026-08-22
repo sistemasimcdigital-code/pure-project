@@ -25,7 +25,7 @@ function SeriesDetail() {
         supabase.from("seasons").select("*").eq("series_id", id).order("season_number"),
         supabase.from("episodes").select("*").eq("series_id", id).order("episode_number"),
       ]);
-      setSeries(s as Series | null);
+      setSeries(s as unknown as Series | null);
       setSeasons((ss as Season[]) ?? []);
       setEpisodes((eps as Episode[]) ?? []);
       if (ss?.[0]) setActiveSeason(ss[0].id);
@@ -57,8 +57,20 @@ function SeriesDetail() {
       </div>
       <div className="mx-auto -mt-40 max-w-6xl px-4 pb-16 sm:px-8">
         <div className="rounded-2xl glass-strong p-6 sm:p-8 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/20 px-2.5 py-1 text-[11px] font-semibold text-primary">
-            {TYPE_LABEL[series.type]}
+          <div className="mb-2 flex items-center gap-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/20 px-2.5 py-1 text-[11px] font-semibold text-primary">
+              {TYPE_LABEL[series.type]}
+            </div>
+            {series.is_dubbed && (
+              <div className="rounded-full bg-primary/20 px-3 py-1 text-[10px] font-bold tracking-wide text-primary backdrop-blur border border-primary/30">
+                AUDIO DUBLADO
+              </div>
+            )}
+            {series.source_platform?.toLowerCase() === 'netflix' && (
+              <div className="rounded-full bg-red-600/20 px-3 py-1 text-[10px] font-bold tracking-wide text-red-500 backdrop-blur border border-red-500/30">
+                NETFLIX
+              </div>
+            )}
           </div>
           <h1 className="mb-3 text-3xl font-black tracking-tight sm:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{series.title}</h1>
           <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-white/70">

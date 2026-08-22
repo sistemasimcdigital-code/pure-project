@@ -11,6 +11,8 @@ export type Series = {
   backdrop_url: string | null;
   featured: boolean;
   episode_count: number;
+  is_dubbed: boolean;
+  source_platform: string | null;
 };
 
 export type Season = {

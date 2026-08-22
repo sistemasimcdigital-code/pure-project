@@ -14,7 +14,7 @@ function Browse() {
   const [list, setList] = useState<Series[]>([]);
   useEffect(() => {
     supabase.from("series").select("*").eq("type", type as DramaType).order("rating", { ascending: false })
-      .then(({ data }) => setList((data as Series[]) ?? []));
+      .then(({ data }) => setList((data as unknown as Series[]) ?? []));
   }, [type]);
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-8">
