@@ -20,8 +20,15 @@ export function PosterCard({ series }: { series: Series }) {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90" />
-        <div className="absolute left-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-primary backdrop-blur">
-          {TYPE_LABEL[series.type]}
+        <div className="absolute left-2 top-2 flex flex-col gap-1">
+          <div className="w-fit rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-primary backdrop-blur">
+            {TYPE_LABEL[series.type]}
+          </div>
+          {series.is_dubbed && (
+            <div className="w-fit rounded-full bg-primary/20 px-2 py-0.5 text-[9px] font-bold tracking-tight text-primary backdrop-blur border border-primary/30">
+              DUBLADO
+            </div>
+          )}
         </div>
         <div className="absolute inset-x-0 bottom-0 p-3">
           <h3 className="line-clamp-1 text-sm font-semibold text-white">{series.title}</h3>
