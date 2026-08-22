@@ -128,8 +128,10 @@ export type Database = {
           episode_count: number
           featured: boolean
           id: string
+          is_dubbed: boolean | null
           poster_url: string | null
           rating: number | null
+          source_platform: string | null
           synopsis: string | null
           title: string
           type: Database["public"]["Enums"]["drama_type"]
@@ -141,8 +143,10 @@ export type Database = {
           episode_count?: number
           featured?: boolean
           id?: string
+          is_dubbed?: boolean | null
           poster_url?: string | null
           rating?: number | null
+          source_platform?: string | null
           synopsis?: string | null
           title: string
           type: Database["public"]["Enums"]["drama_type"]
@@ -154,8 +158,10 @@ export type Database = {
           episode_count?: number
           featured?: boolean
           id?: string
+          is_dubbed?: boolean | null
           poster_url?: string | null
           rating?: number | null
+          source_platform?: string | null
           synopsis?: string | null
           title?: string
           type?: Database["public"]["Enums"]["drama_type"]
