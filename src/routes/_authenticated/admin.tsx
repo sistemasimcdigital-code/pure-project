@@ -5,7 +5,9 @@ import { useAccess } from "@/hooks/useAccess";
 import type { ActivationCode, DramaType, Episode, Season, Series, SubscriptionStatus } from "@/lib/types";
 import { EPISODE_COLUMNS, SUB_STATUS_LABEL } from "@/lib/types";
 import { Check, Copy, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { safeFileName, signedArtUrl, uploadWithProgress } from "@/lib/storage";
+import { safeFileName, uploadWithProgress } from "@/lib/storage";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
+
 import { PartsUploader } from "@/components/admin/PartsUploader";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -200,7 +202,7 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
       <div className="grid gap-2">
         {series.map((s) => (
           <div key={s.id} className="flex items-center gap-3 rounded-lg border border-white/5 bg-card/60 p-2">
-            {s.poster_url && <img src={s.poster_url} alt="" className="h-14 w-10 rounded object-cover" />}
+            <SeriesThumb path={s.poster_url} />
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold">
                 {s.title} <span className="text-xs text-white/40">· {s.type}</span>
