@@ -134,16 +134,17 @@ export function PartsUploader() {
     setSlots((s) => ({ ...s, [id]: { ...(s[id] ?? emptySlot()), ...patch } }));
 
   const pickFile = (ep: Episode, file: File) => {
-    if (!/^video\/(mp4|webm)$/.test(file.type) && !/\.(mp4|webm)$/i.test(file.name)) {
-      return setSlot(ep.id, { status: "error", message: "Envie um arquivo MP4 ou WebM." });
+    if (!VALID_MIME.test(file.type) && !VALID_EXT.test(file.name)) {
+      return setSlot(ep.id, { file: null, status: "error", message: "Envie um vídeo MP4, WebM, MPEG ou MOV." });
     }
     if (file.size > MEDIA_SIZE_LIMIT) {
       return setSlot(ep.id, {
+        file: null,
         status: "error",
         message: `Arquivo de ${fmtSize(file.size)} excede o limite de ${fmtSize(MEDIA_SIZE_LIMIT)} do armazenamento.`,
       });
     }
-    setSlot(ep.id, { file, pct: 0, status: "waiting", message: null });
+    setSlot(ep.id, { file, pct: 0, status: "ready", message: null });
   };
 
   const send = async (ep: Episode) => {
@@ -151,7 +152,7 @@ export function PartsUploader() {
     const file = slot?.file;
     if (!file) return setSlot(ep.id, { status: "error", message: "Escolha um arquivo antes de enviar." });
     setSlot(ep.id, { status: "preparing", pct: 0, message: null });
-    const ext = /\.webm$/i.test(file.name) ? "webm" : "mp4";
+    const ext = (file.name.match(VALID_EXT)?.[1] ?? "mp4").toLowerCase();
     const path = (EXPECTED_PATH[ep.episode_number] ?? `a-noiva-errada-do-principe/temporada-1/parte-${ep.episode_number}.mp4`)
       .replace(/\.mp4$/, `.${ext}`);
     handles.current[ep.id] = await uploadResumable(
@@ -165,12 +166,17 @@ export function PartsUploader() {
           _episode_id: ep.id,
           _media_path: path,
         });
-        if (upErr) return setSlot(ep.id, { status: "error", message: upErr.message });
+        if (upErr) {
+          // Evita objeto órfão no armazenamento quando o banco não confirma o vínculo.
+          await removeMedia(path).catch(() => {});
+          return setSlot(ep.id, { status: "error", message: upErr.message });
+        }
         setSlot(ep.id, { status: "done", pct: 100, file: null, message: null });
         load();
       },
     );
   };
+
 
   const removeUploaded = async (ep: Episode) => {
     const path = mediaPath[ep.id];
