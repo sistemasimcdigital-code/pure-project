@@ -8,10 +8,10 @@ import { ArrowLeft, Loader2, Search as SearchIcon } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/search")({
   head: () => ({
     meta: [
-      { title: "Buscar títulos — Nova" },
-      { name: "description", content: "Busque doramas coreanos, japoneses e chineses no catálogo da Nova." },
-      { property: "og:title", content: "Buscar títulos — Nova" },
-      { property: "og:description", content: "Encontre séries asiáticas licenciadas no catálogo da Nova." },
+      { title: "Buscar títulos — Doramaflix" },
+      { name: "description", content: "Busque doramas coreanos, japoneses e chineses no catálogo da Doramaflix." },
+      { property: "og:title", content: "Buscar títulos — Doramaflix" },
+      { property: "og:description", content: "Encontre séries asiáticas licenciadas no catálogo da Doramaflix." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

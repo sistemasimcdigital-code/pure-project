@@ -77,7 +77,7 @@ function SeriesDetail() {
           <div className="flex flex-wrap gap-3">
             {firstEp && (
               <Link to="/watch/$episodeId" params={{ episodeId: firstEp.id }}
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(59,130,246,0.6)]">
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(229,9,20,0.6)]">
                 <Play className="h-4 w-4 fill-current" /> Assistir T1E1
               </Link>
             )}
@@ -91,7 +91,7 @@ function SeriesDetail() {
               <button key={s.id} onClick={() => setActiveSeason(s.id)}
                 className={`relative px-4 py-3 text-sm font-semibold transition-colors ${activeSeason === s.id ? "text-primary" : "text-white/60 hover:text-white"}`}>
                 {s.title ?? `Temporada ${s.season_number}`}
-                {activeSeason === s.id && <div className="absolute inset-x-0 -bottom-px h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.7)]" />}
+                {activeSeason === s.id && <div className="absolute inset-x-0 -bottom-px h-0.5 bg-primary shadow-[0_0_10px_rgba(229,9,20,0.7)]" />}
               </button>
             ))}
           </div>

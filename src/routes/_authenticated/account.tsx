@@ -6,13 +6,13 @@ import { LifeBuoy, ShieldCheck, ShieldX } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
     meta: [
-      { title: "Minha conta — Nova" },
+      { title: "Minha conta — Doramaflix" },
       {
         name: "description",
-        content: "Veja o status do seu acesso Nova, data de início, validade e origem da autorização.",
+        content: "Veja o status do seu acesso Doramaflix, data de início, validade e origem da autorização.",
       },
-      { property: "og:title", content: "Minha conta — Nova" },
-      { property: "og:description", content: "Status do acesso premium da sua conta na Nova." },
+      { property: "og:title", content: "Minha conta — Doramaflix" },
+      { property: "og:description", content: "Status do acesso premium da sua conta na Doramaflix." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -81,7 +81,7 @@ function Account() {
         </dl>
 
         <p className="mt-6 rounded-xl border border-white/10 bg-black/30 p-4 text-xs text-white/60">
-          A Nova não cobra assinatura. O acesso é concedido a assinantes autorizados externamente e
+          A Doramaflix não cobra assinatura. O acesso é concedido a assinantes autorizados externamente e
           permanece ativo enquanto a autorização estiver válida.
         </p>
 
@@ -89,13 +89,13 @@ function Account() {
           {!hasAccess && (
             <Link
               to="/activate"
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-bold shadow-[0_0_30px_rgba(229,9,20,0.4)]"
             >
               Ativar acesso
             </Link>
           )}
           <a
-            href="mailto:suporte@nova.app?subject=Suporte%20Nova"
+            href="mailto:suporte@doramaflix.app?subject=Suporte%20Doramaflix"
             className="inline-flex items-center gap-2 rounded-lg glass px-4 py-2.5 text-sm font-semibold hover:bg-white/10"
           >
             <LifeBuoy className="h-4 w-4" /> Falar com o suporte

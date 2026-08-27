@@ -7,7 +7,7 @@ import { Eye, EyeOff, Play } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nova — Sign in to premium Asian drama streaming" },
+      { title: "Doramaflix — Sign in to premium Asian drama streaming" },
       { name: "description", content: "Sign in or create an account to stream premium K-Dramas, J-Dramas and C-Dramas." },
     ],
   }),
@@ -91,10 +91,10 @@ function Landing() {
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8">
         <header className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary shadow-[0_0_20px_rgba(59,130,246,0.6)]">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-primary shadow-[0_0_20px_rgba(229,9,20,0.6)]">
             <span className="text-sm font-black">N</span>
           </div>
-          <span className="text-lg font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>NOVA</span>
+          <span className="text-lg font-black tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>DORAMAFLIX</span>
         </header>
 
         <div className="mt-8 grid flex-1 items-center gap-10 lg:grid-cols-2">
@@ -121,7 +121,7 @@ function Landing() {
             <div className="mb-5 flex items-center gap-1 rounded-lg bg-black/30 p-1">
               {(["signin","signup"] as const).map(m => (
                 <button key={m} onClick={() => setMode(m)}
-                  className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition-all ${mode === m ? "bg-primary text-white shadow-[0_0_20px_rgba(59,130,246,0.5)]" : "text-white/60 hover:text-white"}`}>
+                  className={`flex-1 rounded-md px-3 py-2 text-sm font-semibold transition-all ${mode === m ? "bg-primary text-white shadow-[0_0_20px_rgba(229,9,20,0.5)]" : "text-white/60 hover:text-white"}`}>
                   {m === "signin" ? "Sign In" : "Create Account"}
                 </button>
               ))}
@@ -143,9 +143,9 @@ function Landing() {
               </div>
               {err && <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive-foreground">{err}</div>}
               <button type="submit" disabled={loading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all hover:brightness-110 disabled:opacity-60">
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_0_30px_rgba(229,9,20,0.5)] transition-all hover:brightness-110 disabled:opacity-60">
                 <Play className="h-4 w-4 fill-current" />
-                {loading ? "Please wait..." : mode === "signin" ? "Enter Nova" : "Create Account"}
+                {loading ? "Please wait..." : mode === "signin" ? "Enter Doramaflix" : "Create Account"}
               </button>
             </form>
 
@@ -162,7 +162,7 @@ function Landing() {
           </div>
         </div>
 
-        <footer className="mt-10 text-center text-xs text-white/40">© {new Date().getFullYear()} Nova. All dramas are property of their respective owners.</footer>
+        <footer className="mt-10 text-center text-xs text-white/40">© {new Date().getFullYear()} Doramaflix. All dramas are property of their respective owners.</footer>
       </div>
     </div>
   );

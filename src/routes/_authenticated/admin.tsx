@@ -123,7 +123,7 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
   return (
     <div className="space-y-6">
       <div className="rounded-xl glass p-5">
-        <h2 className="mb-4 text-lg font-bold">Nova série</h2>
+        <h2 className="mb-4 text-lg font-bold">Doramaflix série</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <input placeholder="Título *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={inputCls} />
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as DramaType })} className={inputCls}>
@@ -403,7 +403,7 @@ function SubscribersPanel() {
 function randomCode() {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const block = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-  return `NOVA${block()}${block()}`;
+  return `DORA${block()}${block()}`;
 }
 
 function CodesPanel() {

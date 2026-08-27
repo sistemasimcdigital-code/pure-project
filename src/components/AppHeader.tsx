@@ -40,10 +40,10 @@ export function AppHeader() {
     <header className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${scrolled ? "glass-strong" : "bg-gradient-to-b from-black/70 to-transparent"}`}>
       <div className="mx-auto flex h-16 max-w-[1600px] items-center gap-6 px-4 sm:px-8">
         <Link to="/home" className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary shadow-[0_0_20px_rgba(59,130,246,0.6)]">
+          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary shadow-[0_0_20px_rgba(229,9,20,0.6)]">
             <span className="text-sm font-black text-white">N</span>
           </div>
-          <span className="hidden text-lg font-black tracking-tight sm:inline" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>NOVA</span>
+          <span className="hidden text-lg font-black tracking-tight sm:inline" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>DORAMAFLIX</span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex">
           {nav_items.map((n) => {

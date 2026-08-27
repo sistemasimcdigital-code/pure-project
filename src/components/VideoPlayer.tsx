@@ -145,7 +145,7 @@ export function VideoPlayer({ src, episodeId, seriesId, initialProgress = 0, onE
       {/* Center play overlay */}
       {!playing && (
         <button onClick={toggle} className="absolute inset-0 grid place-items-center bg-black/30 backdrop-blur-sm transition-opacity">
-          <div className="grid h-20 w-20 place-items-center rounded-full bg-primary/90 shadow-[0_0_40px_rgba(59,130,246,0.7)]">
+          <div className="grid h-20 w-20 place-items-center rounded-full bg-primary/90 shadow-[0_0_40px_rgba(229,9,20,0.7)]">
             <Play className="h-8 w-8 fill-white text-white" />
           </div>
         </button>
@@ -161,8 +161,8 @@ export function VideoPlayer({ src, episodeId, seriesId, initialProgress = 0, onE
           step={0.1}
           value={time}
           onChange={(e) => seek(Number(e.target.value))}
-          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-[#3b82f6] [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(59,130,246,0.8)]"
-          style={{ background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(time/(duration||1))*100}%, rgba(255,255,255,0.2) ${(time/(duration||1))*100}%)` }}
+          className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-[#e50914] [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(229,9,20,0.8)]"
+          style={{ background: `linear-gradient(to right, #e50914 0%, #e50914 ${(time/(duration||1))*100}%, rgba(255,255,255,0.2) ${(time/(duration||1))*100}%)` }}
         />
 
         <div className="mt-2 flex items-center gap-2 text-white sm:gap-4">

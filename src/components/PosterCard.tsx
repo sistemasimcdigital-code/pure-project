@@ -8,7 +8,7 @@ export function PosterCard({ series }: { series: Series }) {
     <Link
       to="/series/$id"
       params={{ id: series.id }}
-      className="group relative block w-40 sm:w-48 md:w-52 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-card transition-all duration-300 hover:scale-[1.04] hover:border-primary/40 hover:shadow-[0_20px_40px_-10px_rgba(59,130,246,0.35)]"
+      className="group relative block w-40 sm:w-48 md:w-52 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-card transition-all duration-300 hover:scale-[1.04] hover:border-primary/40 hover:shadow-[0_20px_40px_-10px_rgba(229,9,20,0.35)]"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-muted">
         {series.poster_url && (
@@ -38,7 +38,7 @@ export function PosterCard({ series }: { series: Series }) {
           </div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/90 shadow-[0_0_30px_rgba(59,130,246,0.6)]">
+          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/90 shadow-[0_0_30px_rgba(229,9,20,0.6)]">
             <Play className="h-5 w-5 fill-white text-white" />
           </div>
         </div>
