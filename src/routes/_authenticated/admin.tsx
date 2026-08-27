@@ -96,6 +96,27 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
     license_note: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [artBusy, setArtBusy] = useState<"poster_url" | "backdrop_url" | null>(null);
+  const [artPct, setArtPct] = useState(0);
+
+  const uploadArt = async (field: "poster_url" | "backdrop_url", file: File) => {
+    setError(null);
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setError("Use imagens JPG, PNG ou WEBP.");
+    if (file.size > 10 * 1024 * 1024) return setError("A imagem deve ter até 10 MB.");
+    setArtBusy(field);
+    setArtPct(0);
+    try {
+      const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
+      await uploadWithProgress("catalog-art", path, file, setArtPct);
+      const url = await signedArtUrl(path);
+      setForm((f) => ({ ...f, [field]: url }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
+    } finally {
+      setArtBusy(null);
+    }
+  };
+
 
   const save = async () => {
     setError(null);
