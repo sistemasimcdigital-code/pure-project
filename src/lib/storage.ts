@@ -84,14 +84,14 @@ export async function uploadResumable(
   onProgress: (pct: number) => void,
   onDone: (err: Error | null) => void,
 ): Promise<ResumableHandle> {
-  const { tus } = await import("tus-js-client");
+  const { Upload } = await import("tus-js-client");
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
   if (!token) {
     onDone(new Error("Sessão expirada. Entre novamente."));
     return { abort: () => {} };
   }
-  const upload = new tus.Upload(file, {
+  const upload = new Upload(file, {
     endpoint: `${SUPABASE_URL}/storage/v1/upload/resumable`,
     retryDelays: [0, 3000, 6000, 12000, 24000],
     headers: { authorization: `Bearer ${token}`, apikey: ANON_KEY, "x-upsert": "true" },
@@ -104,8 +104,8 @@ export async function uploadResumable(
       cacheControl: "3600",
     },
     chunkSize: 6 * 1024 * 1024,
-    onError: (err) => onDone(err instanceof Error ? err : new Error(String(err))),
-    onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
+    onError: (err: unknown) => onDone(err instanceof Error ? err : new Error(String(err))),
+    onProgress: (sent: number, total: number) => onProgress(Math.round((sent / total) * 100)),
     onSuccess: () => {
       onProgress(100);
       onDone(null);

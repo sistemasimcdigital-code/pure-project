@@ -6,14 +6,16 @@ import type { ActivationCode, DramaType, Episode, Season, Series, SubscriptionSt
 import { EPISODE_COLUMNS, SUB_STATUS_LABEL } from "@/lib/types";
 import { Check, Copy, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { safeFileName, signedArtUrl, uploadWithProgress } from "@/lib/storage";
+import { PartsUploader } from "@/components/admin/PartsUploader";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
-type Tab = "series" | "episodes" | "subscribers" | "codes";
+type Tab = "uploads" | "series" | "episodes" | "subscribers" | "codes";
 
 const TAB_LABEL: Record<Tab, string> = {
+  uploads: "Upload de partes",
   series: "Séries",
   episodes: "Episódios",
   subscribers: "Assinantes",
@@ -23,7 +25,7 @@ const TAB_LABEL: Record<Tab, string> = {
 function Admin() {
   const { loading, isAdmin } = useAccess();
   const [series, setSeries] = useState<Series[]>([]);
-  const [tab, setTab] = useState<Tab>("series");
+  const [tab, setTab] = useState<Tab>("uploads");
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -60,7 +62,7 @@ function Admin() {
         Administração
       </h1>
       <div className="mb-6 flex gap-1 overflow-x-auto rounded-lg bg-black/30 p-1">
-        {(["series", "episodes", "subscribers", "codes"] as const).map((t) => (
+        {(["uploads", "series", "episodes", "subscribers", "codes"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -70,6 +72,7 @@ function Admin() {
           </button>
         ))}
       </div>
+      {tab === "uploads" && <PartsUploader />}
       {tab === "series" && <SeriesPanel series={series} onChange={setSeries} />}
       {tab === "episodes" && <EpisodesPanel series={series} />}
       {tab === "subscribers" && <SubscribersPanel />}

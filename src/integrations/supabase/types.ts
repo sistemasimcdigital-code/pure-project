@@ -393,8 +393,20 @@ export type Database = {
         }
         Returns: string
       }
+      admin_list_episode_media: {
+        Args: { _series_id: string }
+        Returns: {
+          episode_id: string
+          media_path: string
+          video_url: string
+        }[]
+      }
       admin_revoke_activation_code: {
         Args: { _code_id: string }
+        Returns: undefined
+      }
+      admin_set_episode_media: {
+        Args: { _episode_id: string; _media_path: string }
         Returns: undefined
       }
       admin_set_subscription: {
