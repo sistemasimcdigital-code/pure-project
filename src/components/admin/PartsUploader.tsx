@@ -12,7 +12,7 @@ import {
   uploadWithProgress,
   type ResumableHandle,
 } from "@/lib/storage";
-import { AlertTriangle, CheckCircle2, RotateCcw, Trash2, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FolderOpen, RotateCcw, Trash2, Upload } from "lucide-react";
 
 export const TARGET_SERIES_TITLE = "A Noiva Errada do Príncipe";
 
