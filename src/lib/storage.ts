@@ -60,12 +60,27 @@ export function uploadWithProgress(
   });
 }
 
-/** URL longa e assinada para artes de catálogo (bucket privado). */
-export async function signedArtUrl(path: string) {
-  const { data, error } = await supabase.storage.from("catalog-art").createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+/** URL assinada temporária para artes de catálogo (bucket privado). */
+export async function signedArtUrl(path: string, expiresIn = 60 * 60 * 24) {
+  const { data, error } = await supabase.storage.from("catalog-art").createSignedUrl(path, expiresIn);
   if (error || !data?.signedUrl) throw new Error(error?.message ?? "Não foi possível gerar a URL da imagem.");
   return data.signedUrl;
 }
+
+/**
+ * Normaliza o valor salvo no banco para um caminho de objeto do bucket `catalog-art`.
+ * Aceita caminhos puros e converte URLs antigas (assinadas/públicas) do próprio Storage.
+ */
+export function catalogArtPath(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const v = value.trim();
+  if (!v) return null;
+  if (!/^https?:\/\//i.test(v)) return v.replace(/^\/+/, "");
+  const m = v.match(/\/storage\/v1\/object\/(?:sign|public|authenticated)\/catalog-art\/([^?]+)/);
+  if (m?.[1]) return decodeURIComponent(m[1]);
+  return v; // URL externa: usada como está
+}
+
 
 const MEDIA_BUCKET = "media";
 
