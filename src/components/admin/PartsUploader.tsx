@@ -12,7 +12,7 @@ import {
   uploadWithProgress,
   type ResumableHandle,
 } from "@/lib/storage";
-import { AlertTriangle, CheckCircle2, RotateCcw, Trash2, Upload } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FolderOpen, RotateCcw, Trash2, Upload } from "lucide-react";
 
 export const TARGET_SERIES_TITLE = "A Noiva Errada do Príncipe";
 
@@ -25,7 +25,7 @@ const EXPECTED_PATH: Record<number, string> = {
   6: "a-noiva-errada-do-principe/temporada-1/parte-final.mp4",
 };
 
-type SlotStatus = "waiting" | "preparing" | "uploading" | "done" | "error" | "published";
+type SlotStatus = "waiting" | "ready" | "preparing" | "uploading" | "done" | "error" | "published";
 
 type SlotState = {
   file: File | null;
@@ -36,12 +36,18 @@ type SlotState = {
 
 const STATUS_LABEL: Record<SlotStatus, string> = {
   waiting: "Aguardando vídeo",
+  ready: "Pronto para enviar",
   preparing: "Preparando upload",
   uploading: "Enviando",
   done: "Upload concluído",
   error: "Erro — tentar novamente",
   published: "Publicado",
 };
+
+const ACCEPT = "video/mp4,video/webm,video/mpeg,video/quicktime,.mp4,.webm,.mpeg,.mpg,.mov";
+const VALID_EXT = /\.(mp4|webm|mpeg|mpg|mov)$/i;
+const VALID_MIME = /^video\/(mp4|webm|mpeg|quicktime|x-m4v)$/;
+
 
 const fmtSize = (bytes: number) => {
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
@@ -128,16 +134,17 @@ export function PartsUploader() {
     setSlots((s) => ({ ...s, [id]: { ...(s[id] ?? emptySlot()), ...patch } }));
 
   const pickFile = (ep: Episode, file: File) => {
-    if (!/^video\/(mp4|webm)$/.test(file.type) && !/\.(mp4|webm)$/i.test(file.name)) {
-      return setSlot(ep.id, { status: "error", message: "Envie um arquivo MP4 ou WebM." });
+    if (!VALID_MIME.test(file.type) && !VALID_EXT.test(file.name)) {
+      return setSlot(ep.id, { file: null, status: "error", message: "Envie um vídeo MP4, WebM, MPEG ou MOV." });
     }
     if (file.size > MEDIA_SIZE_LIMIT) {
       return setSlot(ep.id, {
+        file: null,
         status: "error",
         message: `Arquivo de ${fmtSize(file.size)} excede o limite de ${fmtSize(MEDIA_SIZE_LIMIT)} do armazenamento.`,
       });
     }
-    setSlot(ep.id, { file, pct: 0, status: "waiting", message: null });
+    setSlot(ep.id, { file, pct: 0, status: "ready", message: null });
   };
 
   const send = async (ep: Episode) => {
@@ -145,7 +152,7 @@ export function PartsUploader() {
     const file = slot?.file;
     if (!file) return setSlot(ep.id, { status: "error", message: "Escolha um arquivo antes de enviar." });
     setSlot(ep.id, { status: "preparing", pct: 0, message: null });
-    const ext = /\.webm$/i.test(file.name) ? "webm" : "mp4";
+    const ext = (file.name.match(VALID_EXT)?.[1] ?? "mp4").toLowerCase();
     const path = (EXPECTED_PATH[ep.episode_number] ?? `a-noiva-errada-do-principe/temporada-1/parte-${ep.episode_number}.mp4`)
       .replace(/\.mp4$/, `.${ext}`);
     handles.current[ep.id] = await uploadResumable(
@@ -159,12 +166,17 @@ export function PartsUploader() {
           _episode_id: ep.id,
           _media_path: path,
         });
-        if (upErr) return setSlot(ep.id, { status: "error", message: upErr.message });
+        if (upErr) {
+          // Evita objeto órfão no armazenamento quando o banco não confirma o vínculo.
+          await removeMedia(path).catch(() => {});
+          return setSlot(ep.id, { status: "error", message: upErr.message });
+        }
         setSlot(ep.id, { status: "done", pct: 100, file: null, message: null });
         load();
       },
     );
   };
+
 
   const removeUploaded = async (ep: Episode) => {
     const path = mediaPath[ep.id];
@@ -306,23 +318,32 @@ export function PartsUploader() {
               </p>
 
               {slot.status !== "published" && (
-                <input
-                  type="file"
-                  accept="video/mp4,video/webm"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) pickFile(ep, f);
-                    e.target.value = "";
-                  }}
-                  className="mt-3 w-full text-xs text-white/70"
-                />
+                <label className="mt-3 inline-flex cursor-pointer items-center gap-1 rounded-md glass px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                  <FolderOpen className="h-3.5 w-3.5" /> Selecionar vídeo
+                  <input
+                    type="file"
+                    accept={ACCEPT}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) pickFile(ep, f);
+                      e.target.value = "";
+                    }}
+                    className="sr-only"
+                  />
+                </label>
               )}
 
-              {slot.file && (
-                <p className="mt-2 truncate text-[11px] text-white/60">
+              {slot.file ? (
+                <p className="mt-2 truncate text-[11px] text-white/70">
                   {slot.file.name} · {fmtSize(slot.file.size)}
                 </p>
+              ) : (
+                slot.status !== "published" &&
+                slot.status !== "done" && (
+                  <p className="mt-2 text-[11px] text-white/40">Nenhum arquivo selecionado.</p>
+                )
               )}
+
 
               {(slot.status === "uploading" || slot.status === "preparing") && (
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
