@@ -110,10 +110,11 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
     setArtBusy(field);
     setArtPct(0);
     try {
-      const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
+      const path = `${field === "poster_url" ? "poster" : "backdrop"}/${safeFileName(file.name)}`;
       await uploadWithProgress("catalog-art", path, file, setArtPct);
-      const url = await signedArtUrl(path);
-      setForm((f) => ({ ...f, [field]: url }));
+      // Guarda somente o caminho do objeto; a URL assinada é gerada na exibição.
+      setForm((f) => ({ ...f, [field]: path }));
+
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
     } finally {
@@ -125,9 +126,7 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
   const save = async () => {
     setError(null);
     if (!form.title.trim()) return setError("Informe o título da série.");
-    for (const url of [form.poster_url, form.backdrop_url]) {
-      if (url && !/^https:\/\//i.test(url)) return setError("As URLs de imagem devem usar https://");
-    }
+
     const { data, error: insertError } = await supabase
       .from("series")
       .insert(form as never)
