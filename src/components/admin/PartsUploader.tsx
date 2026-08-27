@@ -2,17 +2,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Episode, Series } from "@/lib/types";
 import { EPISODE_COLUMNS } from "@/lib/types";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
 import {
   MEDIA_SIZE_LIMIT,
   mediaObjectExists,
   removeMedia,
   safeFileName,
-  signedArtUrl,
   uploadResumable,
   uploadWithProgress,
   type ResumableHandle,
 } from "@/lib/storage";
 import { AlertTriangle, CheckCircle2, FolderOpen, RotateCcw, Trash2, Upload } from "lucide-react";
+
 
 export const TARGET_SERIES_TITLE = "A Noiva Errada do Príncipe";
 
