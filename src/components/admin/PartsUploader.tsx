@@ -65,7 +65,12 @@ export function PartsUploader() {
   const [mediaPath, setMediaPath] = useState<Record<string, string | null>>({});
   const [objectOk, setObjectOk] = useState<Record<string, boolean>>({});
   const [posterPct, setPosterPct] = useState<number | null>(null);
-  const [posterPreview, setPosterPreview] = useState<string | null>(null);
+  const [artFiles, setArtFiles] = useState<{ poster_url: File | null; backdrop_url: File | null }>({
+    poster_url: null,
+    backdrop_url: null,
+  });
+  const [artNotice, setArtNotice] = useState<string | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const handles = useRef<Record<string, ResumableHandle | null>>({});
