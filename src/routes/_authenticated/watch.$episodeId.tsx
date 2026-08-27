@@ -71,7 +71,18 @@ function Watch() {
         setGate("unavailable");
         return;
       }
-      setMediaUrl(row.video_url ?? row.media_path!);
+      if (row.video_url) {
+        setMediaUrl(row.video_url);
+      } else {
+        const { data: signed, error: signError } = await supabase.storage
+          .from("media")
+          .createSignedUrl(row.media_path!, 60 * 60);
+        if (signError || !signed?.signedUrl) {
+          setGate("error");
+          return;
+        }
+        setMediaUrl(signed.signedUrl);
+      }
       setGate("ready");
 
       if (userData.user) {

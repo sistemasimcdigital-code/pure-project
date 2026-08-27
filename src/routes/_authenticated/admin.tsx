@@ -295,7 +295,7 @@ function EpisodesPanel({ series }: { series: Series[] }) {
       return setError("Envie o arquivo de vídeo licenciado ou informe uma URL https válida.");
     const { data, error: e } = await supabase
       .from("episodes")
-      .insert({ ...ep, series_id: seriesId })
+      .insert({ ...ep, series_id: seriesId, media_path: ep.media_path || null, video_url: ep.video_url || null })
       .select(EPISODE_COLUMNS)
       .single();
     if (e) return setError(e.message);
