@@ -7,10 +7,15 @@ import { Eye, EyeOff, Play } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Doramaflix — Sign in to premium Asian drama streaming" },
-      { name: "description", content: "Sign in or create an account to stream premium K-Dramas, J-Dramas and C-Dramas." },
+      { title: "Doramaflix — Doramas premium dublados e legendados" },
+      { name: "description", content: "Entre ou crie sua conta para assistir K-Dramas, J-Dramas e C-Dramas licenciados com qualidade premium." },
+      { property: "og:title", content: "Doramaflix — Doramas premium" },
+      { property: "og:description", content: "Catálogo de doramas licenciados com player premium e continuidade em qualquer dispositivo." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+
   component: Landing,
 });
 
