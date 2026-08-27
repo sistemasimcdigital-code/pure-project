@@ -25,7 +25,7 @@ const EXPECTED_PATH: Record<number, string> = {
   6: "a-noiva-errada-do-principe/temporada-1/parte-final.mp4",
 };
 
-type SlotStatus = "waiting" | "preparing" | "uploading" | "done" | "error" | "published";
+type SlotStatus = "waiting" | "ready" | "preparing" | "uploading" | "done" | "error" | "published";
 
 type SlotState = {
   file: File | null;
@@ -36,12 +36,18 @@ type SlotState = {
 
 const STATUS_LABEL: Record<SlotStatus, string> = {
   waiting: "Aguardando vídeo",
+  ready: "Pronto para enviar",
   preparing: "Preparando upload",
   uploading: "Enviando",
   done: "Upload concluído",
   error: "Erro — tentar novamente",
   published: "Publicado",
 };
+
+const ACCEPT = "video/mp4,video/webm,video/mpeg,video/quicktime,.mp4,.webm,.mpeg,.mpg,.mov";
+const VALID_EXT = /\.(mp4|webm|mpeg|mpg|mov)$/i;
+const VALID_MIME = /^video\/(mp4|webm|mpeg|quicktime|x-m4v)$/;
+
 
 const fmtSize = (bytes: number) => {
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
