@@ -357,7 +357,7 @@ function SubscribersPanel() {
     const { error } = await supabase.rpc("admin_set_subscription", {
       _user_id: userId,
       _status: status,
-      _expires_at: status === "active" && expiry ? new Date(expiry).toISOString() : null,
+      _expires_at: status === "active" && expiry ? new Date(expiry).toISOString() : undefined,
     });
     if (error) return alert(error.message);
     load(q);
@@ -433,9 +433,9 @@ function CodesPanel() {
     const code = randomCode();
     const { error: e } = await supabase.rpc("admin_create_activation_code", {
       _code: code,
-      _grants_days: days === "" ? null : Number(days),
-      _expires_at: null,
-      _note: note || null,
+      _grants_days: days === "" ? undefined : Number(days),
+      _expires_at: undefined,
+      _note: note || undefined,
     });
     if (e) return setError(e.message);
     setCreated(code);
