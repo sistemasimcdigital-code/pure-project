@@ -201,7 +201,7 @@ function Watch() {
             episodeId={ep.id}
             seriesId={ep.series_id}
             initialProgress={initial}
-            posterUrl={ep.thumbnail_url ?? series?.backdrop_url ?? null}
+            posterUrl={ep.thumbnail_url ?? heroArt.url}
             onNext={next ? () => nav({ to: "/watch/$episodeId", params: { episodeId: next.id } }) : undefined}
             onEnded={() => next && nav({ to: "/watch/$episodeId", params: { episodeId: next.id } })}
           />
