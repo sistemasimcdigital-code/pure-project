@@ -189,10 +189,11 @@ export function PartsUploader() {
     try {
       const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
       await uploadWithProgress("catalog-art", path, file, setPosterPct);
-      // Guarda o caminho no banco; a exibição usa URL assinada renovável.
+      // Bucket privado: guarda uma URL assinada, renovada a cada novo envio.
+      const url = await signedArtUrl(path);
       await supabase
         .from("series")
-        .update({ [field]: path } as never)
+        .update({ [field]: url } as never)
         .eq("id", series.id);
       load();
     } catch (e) {
