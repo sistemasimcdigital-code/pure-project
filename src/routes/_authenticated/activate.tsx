@@ -7,16 +7,16 @@ import { KeyRound, Loader2, ShieldCheck } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/activate")({
   head: () => ({
     meta: [
-      { title: "Ativar acesso — Nova" },
+      { title: "Ativar acesso — Doramaflix" },
       {
         name: "description",
         content:
-          "Ative seu acesso premium na Nova usando o código enviado após a assinatura externa autorizada.",
+          "Ative seu acesso premium na Doramaflix usando o código enviado após a assinatura externa autorizada.",
       },
-      { property: "og:title", content: "Ativar acesso — Nova" },
+      { property: "og:title", content: "Ativar acesso — Doramaflix" },
       {
         property: "og:description",
-        content: "Informe seu código de ativação para liberar o catálogo completo da Nova.",
+        content: "Informe seu código de ativação para liberar o catálogo completo da Doramaflix.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -81,7 +81,7 @@ function Activate() {
           Ativar acesso
         </h1>
         <p className="mt-2 text-sm text-white/60">
-          A Nova não cobra assinatura. O acesso é liberado para assinantes autorizados externamente.
+          A Doramaflix não cobra assinatura. O acesso é liberado para assinantes autorizados externamente.
           Informe abaixo o código de ativação que você recebeu.
         </p>
 
@@ -103,7 +103,7 @@ function Activate() {
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="NOVA-XXXX-XXXX"
+              placeholder="DORA-XXXX-XXXX"
               autoComplete="off"
               className="w-full rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-center text-lg font-bold tracking-[0.2em] outline-none focus:border-primary"
             />
@@ -115,7 +115,7 @@ function Activate() {
             <button
               type="submit"
               disabled={busy}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold shadow-[0_0_30px_rgba(59,130,246,0.4)] disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold shadow-[0_0_30px_rgba(229,9,20,0.4)] disabled:opacity-60"
             >
               {busy && <Loader2 className="h-4 w-4 animate-spin" />} Ativar acesso
             </button>
@@ -123,7 +123,7 @@ function Activate() {
         )}
 
         <div className="mt-6 space-y-2 text-xs text-white/50">
-          <p>Ainda não é assinante? A assinatura é feita no canal externo do proprietário da Nova.</p>
+          <p>Ainda não é assinante? A assinatura é feita no canal externo do proprietário da Doramaflix.</p>
           <Link to="/account" className="font-semibold text-primary hover:underline">
             Ver status da minha conta
           </Link>

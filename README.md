@@ -1,7 +1,7 @@
-# Nova
+# Doramaflix
 
 Plataforma de catálogo e reprodução de doramas licenciados (K-Dramas, J-Dramas, C-Dramas) para
-**assinantes autorizados externamente**. A Nova **não cobra assinatura**: o pagamento acontece no
+**assinantes autorizados externamente**. A Doramaflix **não cobra assinatura**: o pagamento acontece no
 canal externo do proprietário (ex.: Assinaturas da página do Facebook) e o acesso interno é liberado
 por código de ativação ou ativação administrativa.
 

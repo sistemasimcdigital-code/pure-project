@@ -6,7 +6,7 @@ import { HeroBanner } from "@/components/HeroBanner";
 import { Carousel } from "@/components/Carousel";
 
 export const Route = createFileRoute("/_authenticated/home")({
-  head: () => ({ meta: [{ title: "Home — Nova" }] }),
+  head: () => ({ meta: [{ title: "Home — Doramaflix" }] }),
   component: Home,
 });
 

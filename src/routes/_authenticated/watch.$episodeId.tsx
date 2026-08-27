@@ -71,7 +71,18 @@ function Watch() {
         setGate("unavailable");
         return;
       }
-      setMediaUrl(row.video_url ?? row.media_path!);
+      if (row.video_url) {
+        setMediaUrl(row.video_url);
+      } else {
+        const { data: signed, error: signError } = await supabase.storage
+          .from("media")
+          .createSignedUrl(row.media_path!, 60 * 60);
+        if (signError || !signed?.signedUrl) {
+          setGate("error");
+          return;
+        }
+        setMediaUrl(signed.signedUrl);
+      }
       setGate("ready");
 
       if (userData.user) {
@@ -119,13 +130,13 @@ function Watch() {
             </div>
             <h2 className="text-xl font-bold">Conteúdo para assinantes autorizados</h2>
             <p className="mt-2 text-sm text-white/60">
-              Seu acesso não está ativo. A Nova não cobra assinatura: o acesso é liberado a assinantes
+              Seu acesso não está ativo. A Doramaflix não cobra assinatura: o acesso é liberado a assinantes
               autorizados externamente por meio de um código de ativação.
             </p>
             <div className="mt-5 flex flex-col gap-2 sm:flex-row">
               <Link
                 to="/activate"
-                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+                className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold shadow-[0_0_30px_rgba(229,9,20,0.4)]"
               >
                 Ativar acesso
               </Link>
@@ -164,7 +175,7 @@ function Watch() {
                     setInitial(savedProgress);
                     setDecided(true);
                   }}
-                  className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold shadow-[0_0_30px_rgba(59,130,246,0.4)]"
+                  className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold shadow-[0_0_30px_rgba(229,9,20,0.4)]"
                 >
                   Retomar em {fmt(savedProgress)}
                 </button>

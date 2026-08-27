@@ -77,9 +77,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Nova — Premium Asian Drama Streaming" },
+      { title: "Doramaflix — Premium Asian Drama Streaming" },
       { name: "description", content: "Stream premium K-Dramas, J-Dramas and C-Dramas in a beautiful black glass experience." },
-      { property: "og:title", content: "Nova — Premium Asian Drama Streaming" },
+      { property: "og:title", content: "Doramaflix — Premium Asian Drama Streaming" },
       { property: "og:description", content: "Stream premium K-Dramas, J-Dramas and C-Dramas in a beautiful black glass experience." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

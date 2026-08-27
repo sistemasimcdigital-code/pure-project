@@ -52,7 +52,7 @@ export function HeroBanner({ series }: { series: Series }) {
             <Link
               to="/series/$id"
               params={{ id: series.id }}
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] sm:px-6"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-black transition-all hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(229,9,20,0.6)] sm:px-6"
             >
               <Play className="h-4 w-4 fill-current" /> Play
             </Link>
