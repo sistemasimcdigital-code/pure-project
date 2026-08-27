@@ -66,3 +66,68 @@ export async function signedArtUrl(path: string) {
   if (error || !data?.signedUrl) throw new Error(error?.message ?? "Não foi possível gerar a URL da imagem.");
   return data.signedUrl;
 }
+
+const MEDIA_BUCKET = "media";
+
+/** Limite de arquivo do bucket privado de vídeos (bytes). */
+export const MEDIA_SIZE_LIMIT = 5 * 1024 * 1024 * 1024;
+
+export type ResumableHandle = { abort: () => void };
+
+/**
+ * Upload resumível (protocolo TUS do Storage) para arquivos grandes.
+ * O navegador envia o arquivo em blocos de 6 MB, sem carregá-lo inteiro na memória.
+ */
+export async function uploadResumable(
+  path: string,
+  file: File,
+  onProgress: (pct: number) => void,
+  onDone: (err: Error | null) => void,
+): Promise<ResumableHandle> {
+  const { tus } = await import("tus-js-client");
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  if (!token) {
+    onDone(new Error("Sessão expirada. Entre novamente."));
+    return { abort: () => {} };
+  }
+  const upload = new tus.Upload(file, {
+    endpoint: `${SUPABASE_URL}/storage/v1/upload/resumable`,
+    retryDelays: [0, 3000, 6000, 12000, 24000],
+    headers: { authorization: `Bearer ${token}`, apikey: ANON_KEY, "x-upsert": "true" },
+    uploadDataDuringCreation: true,
+    removeFingerprintOnSuccess: true,
+    metadata: {
+      bucketName: MEDIA_BUCKET,
+      objectName: path,
+      contentType: file.type || "video/mp4",
+      cacheControl: "3600",
+    },
+    chunkSize: 6 * 1024 * 1024,
+    onError: (err) => onDone(err instanceof Error ? err : new Error(String(err))),
+    onProgress: (sent, total) => onProgress(Math.round((sent / total) * 100)),
+    onSuccess: () => {
+      onProgress(100);
+      onDone(null);
+    },
+  });
+  const previous = await upload.findPreviousUploads();
+  if (previous[0]) upload.resumeFromPreviousUpload(previous[0]);
+  upload.start();
+  return { abort: () => void upload.abort() };
+}
+
+/** Verifica se um objeto existe no bucket privado de vídeos. */
+export async function mediaObjectExists(path: string) {
+  const slash = path.lastIndexOf("/");
+  const folder = slash > -1 ? path.slice(0, slash) : "";
+  const name = slash > -1 ? path.slice(slash + 1) : path;
+  const { data } = await supabase.storage.from(MEDIA_BUCKET).list(folder, { search: name, limit: 100 });
+  return !!data?.some((o) => o.name === name);
+}
+
+/** Remove o vídeo enviado (apenas administradores, conforme políticas do banco). */
+export async function removeMedia(path: string) {
+  const { error } = await supabase.storage.from(MEDIA_BUCKET).remove([path]);
+  if (error) throw new Error(error.message);
+}
