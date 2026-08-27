@@ -2,8 +2,10 @@ import { Link } from "@tanstack/react-router";
 import { Play } from "lucide-react";
 import type { Series } from "@/lib/types";
 import { TYPE_LABEL } from "@/lib/types";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
 
 export function PosterCard({ series }: { series: Series }) {
+  const poster = useSignedCatalogImage(series.poster_url);
   return (
     <Link
       to="/series/$id"
@@ -11,14 +13,15 @@ export function PosterCard({ series }: { series: Series }) {
       className="group relative block w-40 sm:w-48 md:w-52 shrink-0 overflow-hidden rounded-xl border border-white/5 bg-card transition-all duration-300 hover:scale-[1.04] hover:border-primary/40 hover:shadow-[0_20px_40px_-10px_rgba(229,9,20,0.35)]"
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden bg-muted">
-        {series.poster_url && (
+        {poster.url && (
           <img
-            src={series.poster_url}
+            src={poster.url}
             alt={series.title}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         )}
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90" />
         <div className="absolute left-2 top-2 flex flex-col gap-1">
           <div className="w-fit rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-primary backdrop-blur">
