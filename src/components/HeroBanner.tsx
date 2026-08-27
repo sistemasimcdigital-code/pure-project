@@ -2,20 +2,23 @@ import { Link } from "@tanstack/react-router";
 import { Info, Play } from "lucide-react";
 import type { Series } from "@/lib/types";
 import { TYPE_LABEL } from "@/lib/types";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
 
 export function HeroBanner({ series }: { series: Series }) {
+  const art = useSignedCatalogImage(series.backdrop_url ?? series.poster_url);
   return (
     <div className="relative h-[85svh] min-h-[520px] w-full overflow-hidden sm:h-[80vh]">
-      {series.backdrop_url && (
+      {art.url && (
         <div className="absolute inset-0 overflow-hidden">
           <img
-            src={series.backdrop_url}
+            src={art.url}
             alt=""
             className="absolute inset-0 h-full w-full object-cover object-[65%_center] sm:object-center animate-ken-burns"
             draggable={false}
           />
         </div>
       )}
+
       {/* Cinematic overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/85 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#09090b] via-[#09090b]/70 to-transparent sm:via-[#09090b]/50" />

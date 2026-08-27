@@ -5,7 +5,9 @@ import { useAccess } from "@/hooks/useAccess";
 import type { ActivationCode, DramaType, Episode, Season, Series, SubscriptionStatus } from "@/lib/types";
 import { EPISODE_COLUMNS, SUB_STATUS_LABEL } from "@/lib/types";
 import { Check, Copy, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { safeFileName, signedArtUrl, uploadWithProgress } from "@/lib/storage";
+import { safeFileName, uploadWithProgress } from "@/lib/storage";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
+
 import { PartsUploader } from "@/components/admin/PartsUploader";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -83,6 +85,14 @@ function Admin() {
 
 const inputCls = "rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm";
 
+function SeriesThumb({ path }: { path: string | null }) {
+  const art = useSignedCatalogImage(path);
+  if (!art.url) return <div className="grid h-14 w-10 shrink-0 place-items-center rounded bg-white/5 text-[9px] text-white/40">sem capa</div>;
+  return <img src={art.url} alt="" className="h-14 w-10 rounded object-cover" />;
+}
+
+
+
 function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Series[]) => void }) {
   const [form, setForm] = useState({
     title: "",
@@ -110,10 +120,11 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
     setArtBusy(field);
     setArtPct(0);
     try {
-      const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
+      const path = `${field === "poster_url" ? "poster" : "backdrop"}/${safeFileName(file.name)}`;
       await uploadWithProgress("catalog-art", path, file, setArtPct);
-      const url = await signedArtUrl(path);
-      setForm((f) => ({ ...f, [field]: url }));
+      // Guarda somente o caminho do objeto; a URL assinada é gerada na exibição.
+      setForm((f) => ({ ...f, [field]: path }));
+
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
     } finally {
@@ -125,9 +136,7 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
   const save = async () => {
     setError(null);
     if (!form.title.trim()) return setError("Informe o título da série.");
-    for (const url of [form.poster_url, form.backdrop_url]) {
-      if (url && !/^https:\/\//i.test(url)) return setError("As URLs de imagem devem usar https://");
-    }
+
     const { data, error: insertError } = await supabase
       .from("series")
       .insert(form as never)
@@ -201,7 +210,7 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
       <div className="grid gap-2">
         {series.map((s) => (
           <div key={s.id} className="flex items-center gap-3 rounded-lg border border-white/5 bg-card/60 p-2">
-            {s.poster_url && <img src={s.poster_url} alt="" className="h-14 w-10 rounded object-cover" />}
+            <SeriesThumb path={s.poster_url} />
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold">
                 {s.title} <span className="text-xs text-white/40">· {s.type}</span>

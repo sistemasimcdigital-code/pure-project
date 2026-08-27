@@ -2,17 +2,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Episode, Series } from "@/lib/types";
 import { EPISODE_COLUMNS } from "@/lib/types";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
 import {
   MEDIA_SIZE_LIMIT,
   mediaObjectExists,
   removeMedia,
   safeFileName,
-  signedArtUrl,
   uploadResumable,
   uploadWithProgress,
   type ResumableHandle,
 } from "@/lib/storage";
 import { AlertTriangle, CheckCircle2, FolderOpen, RotateCcw, Trash2, Upload } from "lucide-react";
+
 
 export const TARGET_SERIES_TITLE = "A Noiva Errada do Príncipe";
 
@@ -64,7 +65,12 @@ export function PartsUploader() {
   const [mediaPath, setMediaPath] = useState<Record<string, string | null>>({});
   const [objectOk, setObjectOk] = useState<Record<string, boolean>>({});
   const [posterPct, setPosterPct] = useState<number | null>(null);
-  const [posterPreview, setPosterPreview] = useState<string | null>(null);
+  const [artFiles, setArtFiles] = useState<{ poster_url: File | null; backdrop_url: File | null }>({
+    poster_url: null,
+    backdrop_url: null,
+  });
+  const [artNotice, setArtNotice] = useState<string | null>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const handles = useRef<Record<string, ResumableHandle | null>>({});
@@ -120,15 +126,10 @@ export function PartsUploader() {
     load();
   }, [load]);
 
-  // Capa privada: gera uma URL assinada renovada a cada carregamento da página.
-  useEffect(() => {
-    if (!series?.poster_url) return setPosterPreview(null);
-    const path = series.poster_url.startsWith("http") ? null : series.poster_url;
-    if (!path) return setPosterPreview(series.poster_url);
-    signedArtUrl(path)
-      .then(setPosterPreview)
-      .catch(() => setPosterPreview(null));
-  }, [series?.poster_url]);
+  // Capa privada: a URL assinada é gerada na exibição, nunca salva no banco.
+  const posterArt = useSignedCatalogImage(series?.poster_url);
+  const backdropArt = useSignedCatalogImage(series?.backdrop_url);
+
 
   const setSlot = (id: string, patch: Partial<SlotState>) =>
     setSlots((s) => ({ ...s, [id]: { ...(s[id] ?? emptySlot()), ...patch } }));
@@ -192,21 +193,31 @@ export function PartsUploader() {
     }
   };
 
-  const uploadPoster = async (file: File, field: "poster_url" | "backdrop_url") => {
-    if (!series) return;
+  const pickArt = (field: "poster_url" | "backdrop_url", file: File) => {
     setError(null);
+    setArtNotice(null);
     if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setError("Use imagens JPG, PNG ou WEBP.");
     if (file.size > 10 * 1024 * 1024) return setError("A imagem deve ter até 10 MB.");
+    setArtFiles((a) => ({ ...a, [field]: file }));
+  };
+
+  const uploadArt = async (field: "poster_url" | "backdrop_url") => {
+    const file = artFiles[field];
+    if (!series || !file) return;
+    setError(null);
+    setArtNotice(null);
     setPosterPct(0);
     try {
-      const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
+      const path = `${field === "poster_url" ? "poster" : "backdrop"}/${safeFileName(file.name)}`;
       await uploadWithProgress("catalog-art", path, file, setPosterPct);
-      // Bucket privado: guarda uma URL assinada, renovada a cada novo envio.
-      const url = await signedArtUrl(path);
-      await supabase
+      // Bucket privado: o banco guarda somente o caminho do objeto.
+      const { error: upErr } = await supabase
         .from("series")
-        .update({ [field]: url } as never)
+        .update({ [field]: path } as never)
         .eq("id", series.id);
+      if (upErr) throw new Error(upErr.message);
+      setArtFiles((a) => ({ ...a, [field]: null }));
+      setArtNotice(field === "poster_url" ? "Capa enviada com sucesso." : "Banner enviado com sucesso.");
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
@@ -214,6 +225,7 @@ export function PartsUploader() {
       setPosterPct(null);
     }
   };
+
 
   const uploading = Object.values(slots).some((s) => s.status === "uploading" || s.status === "preparing");
   const missing = eps.filter((e) => !mediaPath[e.id] || !objectOk[e.id]);
@@ -250,40 +262,69 @@ export function PartsUploader() {
           retomada automática em caso de queda de conexão. Limite por arquivo: {fmtSize(MEDIA_SIZE_LIMIT)}.
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <div className="h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black/40">
-            {posterPreview && <img src={posterPreview} alt="Capa da série" className="h-full w-full object-cover" />}
-          </div>
-          <div className="grid flex-1 gap-2">
-            <label className="text-xs font-semibold text-white/70">Capa (poster) — armazenamento privado</label>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadPoster(f, "poster_url");
-                e.target.value = "";
-              }}
-              className="text-xs text-white/70"
-            />
-            <label className="text-xs font-semibold text-white/70">Banner (backdrop) — opcional</label>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadPoster(f, "backdrop_url");
-                e.target.value = "";
-              }}
-              className="text-xs text-white/70"
-            />
-            {posterPct !== null && (
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                <div className="h-full bg-primary transition-all" style={{ width: `${posterPct}%` }} />
-              </div>
-            )}
+        <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-4">
+          <h3 className="text-sm font-bold">Capa e banner</h3>
+          <div className="mt-3 flex flex-wrap items-start gap-4">
+            <div className="h-36 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black/40">
+              {posterArt.url ? (
+                <img src={posterArt.url} alt="Capa da série" className="h-full w-full object-cover" />
+              ) : (
+                <div className="grid h-full place-items-center px-2 text-center text-[10px] text-white/40">
+                  {posterArt.loading ? "Carregando…" : "sem capa"}
+                </div>
+              )}
+            </div>
+            <div className="grid flex-1 gap-3">
+              <p className={`text-xs font-semibold ${posterArt.url ? "text-primary" : "text-destructive"}`}>
+                {posterArt.url ? "Capa configurada" : "Capa não encontrada — selecione uma nova imagem"}
+              </p>
+              {(["poster_url", "backdrop_url"] as const).map((field) => (
+                <div key={field} className="grid gap-2">
+                  <span className="text-xs text-white/70">
+                    {field === "poster_url" ? "Capa (poster) — JPG, PNG ou WebP até 10 MB" : "Banner (backdrop) — opcional"}
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-1 rounded-md glass px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                      <FolderOpen className="h-3.5 w-3.5" />
+                      {field === "poster_url" ? "Selecionar capa" : "Selecionar banner"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) pickArt(field, f);
+                          e.target.value = "";
+                        }}
+                        className="sr-only"
+                      />
+                    </label>
+                    <button
+                      onClick={() => uploadArt(field)}
+                      disabled={!artFiles[field] || posterPct !== null}
+                      className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-bold disabled:opacity-40"
+                    >
+                      <Upload className="h-3.5 w-3.5" /> {field === "poster_url" ? "Enviar capa" : "Enviar banner"}
+                    </button>
+                    <span className="truncate text-[11px] text-white/60">
+                      {artFiles[field]
+                        ? `${artFiles[field]!.name} · ${fmtSize(artFiles[field]!.size)}`
+                        : field === "backdrop_url" && backdropArt.url
+                          ? "Banner configurado"
+                          : "Nenhum arquivo selecionado."}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {posterPct !== null && (
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${posterPct}%` }} />
+                </div>
+              )}
+              {artNotice && <p className="text-xs text-primary">{artNotice}</p>}
+            </div>
           </div>
         </div>
+
         {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
         {notice && <p className="mt-3 text-sm text-primary">{notice}</p>}
       </div>

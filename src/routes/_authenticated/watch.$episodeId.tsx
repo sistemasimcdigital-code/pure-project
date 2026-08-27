@@ -5,6 +5,8 @@ import type { Episode, Series } from "@/lib/types";
 import { EPISODE_COLUMNS } from "@/lib/types";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { ArrowLeft, Lock } from "lucide-react";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
+
 
 export const Route = createFileRoute("/_authenticated/watch/$episodeId")({
   component: Watch,
@@ -17,6 +19,8 @@ function Watch() {
   const nav = useNavigate();
   const [ep, setEp] = useState<Episode | null>(null);
   const [series, setSeries] = useState<Series | null>(null);
+  const heroArt = useSignedCatalogImage(series?.backdrop_url);
+
   const [next, setNext] = useState<Episode | null>(null);
   const [initial, setInitial] = useState(0);
   const [savedProgress, setSavedProgress] = useState<number | null>(null);
@@ -197,7 +201,7 @@ function Watch() {
             episodeId={ep.id}
             seriesId={ep.series_id}
             initialProgress={initial}
-            posterUrl={ep.thumbnail_url ?? series?.backdrop_url ?? null}
+            posterUrl={ep.thumbnail_url ?? heroArt.url}
             onNext={next ? () => nav({ to: "/watch/$episodeId", params: { episodeId: next.id } }) : undefined}
             onEnded={() => next && nav({ to: "/watch/$episodeId", params: { episodeId: next.id } })}
           />
