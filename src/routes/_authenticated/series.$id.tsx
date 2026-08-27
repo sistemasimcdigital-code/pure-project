@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-r
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Episode, Season, Series, WatchProgress } from "@/lib/types";
-import { TYPE_LABEL } from "@/lib/types";
+import { EPISODE_COLUMNS, TYPE_LABEL } from "@/lib/types";
 import { ArrowLeft, Play } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/series/$id")({
@@ -23,11 +23,11 @@ function SeriesDetail() {
       const [{ data: s }, { data: ss }, { data: eps }] = await Promise.all([
         supabase.from("series").select("*").eq("id", id).maybeSingle(),
         supabase.from("seasons").select("*").eq("series_id", id).order("season_number"),
-        supabase.from("episodes").select("*").eq("series_id", id).order("episode_number"),
+        supabase.from("episodes").select(EPISODE_COLUMNS).eq("series_id", id).order("episode_number"),
       ]);
       setSeries(s as unknown as Series | null);
       setSeasons((ss as Season[]) ?? []);
-      setEpisodes((eps as Episode[]) ?? []);
+      setEpisodes((eps as unknown as Episode[]) ?? []);
       if (ss?.[0]) setActiveSeason(ss[0].id);
 
       const { data: userData } = await supabase.auth.getUser();
@@ -52,7 +52,7 @@ function SeriesDetail() {
         {series.backdrop_url && <img src={series.backdrop_url} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/70 to-[#09090b]/30" />
         <button onClick={() => nav({ to: "/home" })} className="absolute left-4 top-20 inline-flex items-center gap-1 rounded-full glass px-3 py-1.5 text-xs font-medium hover:bg-white/10">
-          <ArrowLeft className="h-3.5 w-3.5" /> Back
+          <ArrowLeft className="h-3.5 w-3.5" /> Voltar
         </button>
       </div>
       <div className="mx-auto -mt-40 max-w-6xl px-4 pb-16 sm:px-8">
@@ -66,24 +66,19 @@ function SeriesDetail() {
                 AUDIO DUBLADO
               </div>
             )}
-            {series.source_platform?.toLowerCase() === 'netflix' && (
-              <div className="rounded-full bg-red-600/20 px-3 py-1 text-[10px] font-bold tracking-wide text-red-500 backdrop-blur border border-red-500/30">
-                NETFLIX
-              </div>
-            )}
           </div>
           <h1 className="mb-3 text-3xl font-black tracking-tight sm:text-5xl" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{series.title}</h1>
           <div className="mb-4 flex flex-wrap items-center gap-4 text-sm text-white/70">
             <span className="text-primary font-semibold">★ {series.rating?.toFixed(1)}</span>
             <span>{series.year}</span>
-            <span>{series.episode_count} episodes</span>
+            <span>{series.episode_count} episódios</span>
           </div>
           <p className="mb-6 max-w-3xl text-white/80">{series.synopsis}</p>
           <div className="flex flex-wrap gap-3">
             {firstEp && (
               <Link to="/watch/$episodeId" params={{ episodeId: firstEp.id }}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-primary hover:text-white hover:shadow-[0_0_30px_rgba(59,130,246,0.6)]">
-                <Play className="h-4 w-4 fill-current" /> Play S1E1
+                <Play className="h-4 w-4 fill-current" /> Assistir T1E1
               </Link>
             )}
           </div>
@@ -95,7 +90,7 @@ function SeriesDetail() {
             {seasons.map(s => (
               <button key={s.id} onClick={() => setActiveSeason(s.id)}
                 className={`relative px-4 py-3 text-sm font-semibold transition-colors ${activeSeason === s.id ? "text-primary" : "text-white/60 hover:text-white"}`}>
-                {s.title ?? `Season ${s.season_number}`}
+                {s.title ?? `Temporada ${s.season_number}`}
                 {activeSeason === s.id && <div className="absolute inset-x-0 -bottom-px h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.7)]" />}
               </button>
             ))}

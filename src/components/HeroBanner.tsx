@@ -33,11 +33,6 @@ export function HeroBanner({ series }: { series: Series }) {
                 AUDIO DUBLADO
               </div>
             )}
-            {series.source_platform?.toLowerCase() === 'netflix' && (
-              <div className="rounded-full bg-red-600/20 px-3 py-1 text-[10px] font-bold tracking-wide text-red-500 backdrop-blur border border-red-500/30">
-                NETFLIX
-              </div>
-            )}
           </div>
           <h1
             className="mb-3 text-[2rem] font-black leading-[1.05] tracking-tight sm:mb-4 sm:text-5xl md:text-6xl"
