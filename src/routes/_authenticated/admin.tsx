@@ -85,6 +85,14 @@ function Admin() {
 
 const inputCls = "rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-sm";
 
+function SeriesThumb({ path }: { path: string | null }) {
+  const art = useSignedCatalogImage(path);
+  if (!art.url) return <div className="grid h-14 w-10 shrink-0 place-items-center rounded bg-white/5 text-[9px] text-white/40">sem capa</div>;
+  return <img src={art.url} alt="" className="h-14 w-10 rounded object-cover" />;
+}
+
+
+
 function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Series[]) => void }) {
   const [form, setForm] = useState({
     title: "",
