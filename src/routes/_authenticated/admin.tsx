@@ -233,6 +233,7 @@ function EpisodesPanel({ series }: { series: Series[] }) {
     duration_seconds: 0,
     thumbnail_url: "",
     video_url: "",
+    media_path: "",
     published: true,
     is_premium: true,
   });
@@ -257,7 +258,23 @@ function EpisodesPanel({ series }: { series: Series[] }) {
       .then(({ data }) => setEps((data as unknown as Episode[]) ?? []));
   }, [seriesId]);
 
+  const [videoPct, setVideoPct] = useState<number | null>(null);
   const untrustedMedia = !!ep.video_url && !!STORAGE_HOST && !ep.video_url.startsWith(STORAGE_HOST);
+
+  const uploadVideo = async (file: File) => {
+    setError(null);
+    if (!/\.(mp4|webm|m3u8)$/i.test(file.name)) return setError("Envie arquivos MP4, WEBM ou playlist .m3u8.");
+    setVideoPct(0);
+    try {
+      const path = `${seriesId}/${safeFileName(file.name)}`;
+      await uploadWithProgress("media", path, file, setVideoPct);
+      setEp((e) => ({ ...e, media_path: path, video_url: "" }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha no upload do vídeo.");
+    } finally {
+      setVideoPct(null);
+    }
+  };
 
   const addSeason = async () => {
     if (!seriesId) return;
@@ -274,7 +291,8 @@ function EpisodesPanel({ series }: { series: Series[] }) {
     setError(null);
     if (!seriesId || !ep.season_id) return setError("Selecione a série e a temporada.");
     if (!ep.title.trim()) return setError("Informe o título do episódio.");
-    if (!/^https:\/\/.+/i.test(ep.video_url)) return setError("Informe uma URL de mídia válida (https).");
+    if (!ep.media_path && !/^https:\/\/.+/i.test(ep.video_url))
+      return setError("Envie o arquivo de vídeo licenciado ou informe uma URL https válida.");
     const { data, error: e } = await supabase
       .from("episodes")
       .insert({ ...ep, series_id: seriesId })
@@ -283,7 +301,7 @@ function EpisodesPanel({ series }: { series: Series[] }) {
     if (e) return setError(e.message);
     setEps([...eps, data as unknown as Episode]);
     await supabase.from("series").update({ episode_count: eps.length + 1 }).eq("id", seriesId);
-    setEp({ ...ep, title: "", synopsis: "", video_url: "", thumbnail_url: "", episode_number: ep.episode_number + 1 });
+    setEp({ ...ep, title: "", synopsis: "", video_url: "", media_path: "", thumbnail_url: "", episode_number: ep.episode_number + 1 });
   };
 
   return (
@@ -323,7 +341,26 @@ function EpisodesPanel({ series }: { series: Series[] }) {
               </select>
               <input type="number" placeholder="Nº do episódio" value={ep.episode_number} onChange={(e) => setEp({ ...ep, episode_number: +e.target.value })} className={inputCls} />
               <input placeholder="Título *" value={ep.title} onChange={(e) => setEp({ ...ep, title: e.target.value })} className={`${inputCls} sm:col-span-2`} />
-              <input placeholder="URL da mídia licenciada (MP4 ou .m3u8)" value={ep.video_url} onChange={(e) => setEp({ ...ep, video_url: e.target.value })} className={`${inputCls} sm:col-span-2`} />
+              <div className="grid gap-2 rounded-lg border border-white/10 bg-black/20 p-3 sm:col-span-2">
+                <label className="text-xs font-semibold text-white/70">Mídia licenciada (upload para armazenamento privado)</label>
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,.m3u8"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) uploadVideo(f);
+                    e.target.value = "";
+                  }}
+                  className="text-xs text-white/70"
+                />
+                {videoPct !== null && (
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                    <div className="h-full bg-primary transition-all" style={{ width: `${videoPct}%` }} />
+                  </div>
+                )}
+                {ep.media_path && <p className="truncate text-[11px] text-white/40">Arquivo protegido: {ep.media_path}</p>}
+                <input placeholder="Ou URL externa de streaming protegido (https)" value={ep.video_url} onChange={(e) => setEp({ ...ep, video_url: e.target.value, media_path: "" })} className={inputCls} />
+              </div>
               <input placeholder="URL da miniatura (https)" value={ep.thumbnail_url} onChange={(e) => setEp({ ...ep, thumbnail_url: e.target.value })} className={inputCls} />
               <input type="number" placeholder="Duração (segundos)" value={ep.duration_seconds} onChange={(e) => setEp({ ...ep, duration_seconds: +e.target.value })} className={inputCls} />
               <textarea placeholder="Sinopse" value={ep.synopsis} onChange={(e) => setEp({ ...ep, synopsis: e.target.value })} className={`${inputCls} sm:col-span-2`} rows={2} />
@@ -452,7 +489,7 @@ function randomCode() {
 
 function CodesPanel() {
   const [codes, setCodes] = useState<ActivationCode[]>([]);
-  const [days, setDays] = useState<number | "">("");
+  const [days, setDays] = useState<number>(30);
   const [note, setNote] = useState("");
   const [created, setCreated] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -474,10 +511,11 @@ function CodesPanel() {
 
   const create = async () => {
     setError(null);
+    if (!days || days < 1) return setError("Informe a duração do acesso (mínimo 1 dia).");
     const code = randomCode();
     const { error: e } = await supabase.rpc("admin_create_activation_code", {
       _code: code,
-      _grants_days: days === "" ? undefined : Number(days),
+      _grants_days: Number(days),
       _expires_at: undefined,
       _note: note || undefined,
     });
@@ -500,7 +538,7 @@ function CodesPanel() {
       <div className="rounded-xl glass p-5">
         <h3 className="mb-3 text-sm font-bold">Gerar código de ativação</h3>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input type="number" min={1} placeholder="Dias de acesso (vazio = sem expiração)" value={days} onChange={(e) => setDays(e.target.value === "" ? "" : +e.target.value)} className={inputCls} />
+          <input type="number" min={1} placeholder="Dias de acesso (mínimo 1)" value={days} onChange={(e) => setDays(+e.target.value)} className={inputCls} />
           <input placeholder="Observação interna" value={note} onChange={(e) => setNote(e.target.value)} className={inputCls} />
         </div>
         <button onClick={create} className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-bold">Gerar código</button>
