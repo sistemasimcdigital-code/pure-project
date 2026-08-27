@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Episode, Season, Series, WatchProgress } from "@/lib/types";
 import { EPISODE_COLUMNS, TYPE_LABEL } from "@/lib/types";
 import { ArrowLeft, Play } from "lucide-react";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
+
 
 export const Route = createFileRoute("/_authenticated/series/$id")({
   component: SeriesDetail,
@@ -17,6 +19,8 @@ function SeriesDetail() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [activeSeason, setActiveSeason] = useState<string | null>(null);
   const [progress, setProgress] = useState<Record<string, WatchProgress>>({});
+  const art = useSignedCatalogImage(series?.backdrop_url ?? series?.poster_url);
+
 
   useEffect(() => {
     (async () => {
