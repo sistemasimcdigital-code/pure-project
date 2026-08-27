@@ -42,16 +42,15 @@ function Home() {
   const k = series.filter(s => s.type === "kdrama");
   const j = series.filter(s => s.type === "jdrama");
   const c = series.filter(s => s.type === "cdrama");
-  const netflixDubbed = series.filter(s => s.source_platform?.toLowerCase() === 'netflix' && s.is_dubbed);
   const dubbed = series.filter(s => s.is_dubbed);
 
   if (loading) {
-    return <div className="grid min-h-[70vh] place-items-center text-white/50">Loading catalog...</div>;
+    return <div className="grid min-h-[70vh] place-items-center text-white/50">Carregando catálogo…</div>;
   }
   if (!series.length) {
     return <div className="mx-auto max-w-2xl px-4 py-20 text-center text-white/60">
-      <h2 className="mb-2 text-2xl font-bold text-white">No dramas yet</h2>
-      <p>Add some from the Admin panel to get started.</p>
+      <h2 className="mb-2 text-2xl font-bold text-white">Catálogo vazio</h2>
+      <p>Cadastre títulos licenciados no painel administrativo para começar.</p>
     </div>;
   }
 
@@ -60,13 +59,12 @@ function Home() {
       {featured && <HeroBanner series={featured} />}
       <div className="relative -mt-16 space-y-6 pb-16 sm:-mt-24">
 
-        {continueWatching.length > 0 && <Carousel title="Continue Watching" series={continueWatching} />}
-        {netflixDubbed.length > 0 && <Carousel title="Populares na Netflix (Dublados)" series={netflixDubbed} />}
-        {dubbed.length > 0 && <Carousel title="Audio Dublado" series={dubbed} />}
+        {continueWatching.length > 0 && <Carousel title="Continuar assistindo" series={continueWatching} />}
+        {dubbed.length > 0 && <Carousel title="Áudio dublado (PT-BR)" series={dubbed} />}
         <Carousel title="K-Dramas" series={k} />
         <Carousel title="J-Dramas" series={j} />
         <Carousel title="C-Dramas" series={c} />
-        <Carousel title="Recently Added" series={[...series].slice(0, 12)} />
+        <Carousel title="Adicionados recentemente" series={[...series].slice(0, 12)} />
       </div>
     </div>
   );

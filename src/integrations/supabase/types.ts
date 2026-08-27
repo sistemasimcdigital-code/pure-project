@@ -10,46 +10,106 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
+      activation_codes: {
+        Row: {
+          code_hash: string
+          code_last4: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          grants_days: number | null
+          id: string
+          note: string | null
+          redeemed_at: string | null
+          redeemed_by: string | null
+          status: Database["public"]["Enums"]["activation_code_status"]
+        }
+        Insert: {
+          code_hash: string
+          code_last4: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          grants_days?: number | null
+          id?: string
+          note?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          status?: Database["public"]["Enums"]["activation_code_status"]
+        }
+        Update: {
+          code_hash?: string
+          code_last4?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          grants_days?: number | null
+          id?: string
+          note?: string | null
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          status?: Database["public"]["Enums"]["activation_code_status"]
+        }
+        Relationships: []
+      }
       episodes: {
         Row: {
           created_at: string
           duration_seconds: number | null
           episode_number: number
           id: string
+          is_premium: boolean
+          language: string | null
+          license_note: string | null
+          media_path: string | null
+          published: boolean
           season_id: string
           series_id: string
+          subtitle_languages: string[] | null
           synopsis: string | null
           thumbnail_url: string | null
           title: string
-          video_url: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
           duration_seconds?: number | null
           episode_number: number
           id?: string
+          is_premium?: boolean
+          language?: string | null
+          license_note?: string | null
+          media_path?: string | null
+          published?: boolean
           season_id: string
           series_id: string
+          subtitle_languages?: string[] | null
           synopsis?: string | null
           thumbnail_url?: string | null
           title: string
-          video_url: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
           duration_seconds?: number | null
           episode_number?: number
           id?: string
+          is_premium?: boolean
+          language?: string | null
+          license_note?: string | null
+          media_path?: string | null
+          published?: boolean
           season_id?: string
           series_id?: string
+          subtitle_languages?: string[] | null
           synopsis?: string | null
           thumbnail_url?: string | null
           title?: string
-          video_url?: string
+          video_url?: string | null
         }
         Relationships: [
           {
@@ -73,6 +133,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
           updated_at: string
         }
@@ -80,6 +141,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id: string
           updated_at?: string
         }
@@ -87,6 +149,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
           updated_at?: string
         }
@@ -124,14 +187,21 @@ export type Database = {
       series: {
         Row: {
           backdrop_url: string | null
+          content_rating: string | null
           created_at: string
           episode_count: number
           featured: boolean
           id: string
           is_dubbed: boolean | null
+          is_premium: boolean
+          is_sample_data: boolean
+          language: string | null
+          license_note: string | null
           poster_url: string | null
+          published: boolean
           rating: number | null
           source_platform: string | null
+          subtitle_languages: string[] | null
           synopsis: string | null
           title: string
           type: Database["public"]["Enums"]["drama_type"]
@@ -139,14 +209,21 @@ export type Database = {
         }
         Insert: {
           backdrop_url?: string | null
+          content_rating?: string | null
           created_at?: string
           episode_count?: number
           featured?: boolean
           id?: string
           is_dubbed?: boolean | null
+          is_premium?: boolean
+          is_sample_data?: boolean
+          language?: string | null
+          license_note?: string | null
           poster_url?: string | null
+          published?: boolean
           rating?: number | null
           source_platform?: string | null
+          subtitle_languages?: string[] | null
           synopsis?: string | null
           title: string
           type: Database["public"]["Enums"]["drama_type"]
@@ -154,18 +231,91 @@ export type Database = {
         }
         Update: {
           backdrop_url?: string | null
+          content_rating?: string | null
           created_at?: string
           episode_count?: number
           featured?: boolean
           id?: string
           is_dubbed?: boolean | null
+          is_premium?: boolean
+          is_sample_data?: boolean
+          language?: string | null
+          license_note?: string | null
           poster_url?: string | null
+          published?: boolean
           rating?: number | null
           source_platform?: string | null
+          subtitle_languages?: string[] | null
           synopsis?: string | null
           title?: string
           type?: Database["public"]["Enums"]["drama_type"]
           year?: number | null
+        }
+        Relationships: []
+      }
+      subscription_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          expires_at: string | null
+          external_reference: string | null
+          id: string
+          source: Database["public"]["Enums"]["subscription_source"]
+          started_at: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          external_reference?: string | null
+          id?: string
+          source?: Database["public"]["Enums"]["subscription_source"]
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          external_reference?: string | null
+          id?: string
+          source?: Database["public"]["Enums"]["subscription_source"]
+          started_at?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -234,6 +384,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_activation_code: {
+        Args: {
+          _code: string
+          _expires_at?: string
+          _grants_days?: number
+          _note?: string
+        }
+        Returns: string
+      }
+      admin_revoke_activation_code: {
+        Args: { _code_id: string }
+        Returns: undefined
+      }
+      admin_set_subscription: {
+        Args: {
+          _expires_at?: string
+          _status: Database["public"]["Enums"]["subscription_status"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      get_episode_media: {
+        Args: { _episode_id: string }
+        Returns: {
+          media_path: string
+          video_url: string
+        }[]
+      }
+      has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -241,10 +420,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      redeem_activation_code: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
+      activation_code_status: "available" | "redeemed" | "revoked" | "expired"
       app_role: "admin" | "user"
       drama_type: "kdrama" | "jdrama" | "cdrama"
+      subscription_source:
+        | "facebook_manual"
+        | "external_manual"
+        | "activation_code"
+      subscription_status: "active" | "suspended" | "expired" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -372,8 +558,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activation_code_status: ["available", "redeemed", "revoked", "expired"],
       app_role: ["admin", "user"],
       drama_type: ["kdrama", "jdrama", "cdrama"],
+      subscription_source: [
+        "facebook_manual",
+        "external_manual",
+        "activation_code",
+      ],
+      subscription_status: ["active", "suspended", "expired", "cancelled"],
     },
   },
 } as const
