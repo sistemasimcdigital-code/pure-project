@@ -412,6 +412,104 @@ function EpisodesPanel({ series }: { series: Series[] }) {
 
 type ProfileRow = { id: string; email: string | null; display_name: string | null };
 
+function maskEmail(email: string) {
+  const [user, domain] = email.split("@");
+  if (!domain) return email;
+  return `${(user ?? "").slice(0, 2)}***@${domain}`;
+}
+
+function InviteSubscriberCard({ onDone }: { onDone: () => void }) {
+  const invite = useServerFn(activateAndInviteSubscriber);
+  const [email, setEmail] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<InviteResult | null>(null);
+  const [lastSentAt, setLastSentAt] = useState<number | null>(null);
+
+  const send = async () => {
+    const normalized = email.trim().toLowerCase();
+    if (!normalized) return;
+    if (lastSentAt && Date.now() - lastSentAt < 60_000) {
+      setResult({ ok: false, code: "rate_limited", message: "Aguarde 1 minuto para reenviar o convite." });
+      return;
+    }
+    const validade = expiresAt
+      ? new Date(expiresAt).toLocaleDateString("pt-BR")
+      : "30 dias a partir de agora";
+    const confirmed = confirm(
+      `Ativar acesso de ${maskEmail(normalized)} (validade: ${validade}).\n\nConfirme que esta pessoa possui uma assinatura externa ativa.`,
+    );
+    if (!confirmed) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await invite({
+        data: {
+          email: normalized,
+          expiresAt: expiresAt || null,
+          redirectTo: `${window.location.origin}/invite`,
+        },
+      });
+      setResult(res);
+      if (res.ok) {
+        setLastSentAt(Date.now());
+        onDone();
+      }
+    } catch {
+      setResult({ ok: false, code: "failed", message: "Falha na operação. Tente novamente." });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl glass p-5">
+      <h3 className="text-sm font-bold">Ativar assinante externo</h3>
+      <p className="mt-1 text-xs text-white/50">
+        O convite permite criar a conta e definir a própria senha. Nenhuma senha é criada ou enviada por aqui.
+      </p>
+      <label className="mt-3 block text-xs text-white/50">E-mail do assinante</label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="assinante@dominio.com"
+        className={`mt-1 w-full ${inputCls}`}
+      />
+      <label className="mt-3 block text-xs text-white/50">Validade (padrão: 30 dias)</label>
+      <input type="date" value={expiresAt} onChange={(e) => setExpiresAt(e.target.value)} className={`mt-1 ${inputCls}`} />
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          disabled={busy || !email.trim()}
+          onClick={send}
+          className="rounded-md bg-primary px-4 py-2 text-xs font-bold disabled:opacity-50"
+        >
+          {busy ? "Enviando…" : "Ativar e enviar acesso"}
+        </button>
+        {lastSentAt && (
+          <button
+            disabled={busy}
+            onClick={send}
+            className="rounded-md glass px-4 py-2 text-xs font-semibold hover:bg-white/10 disabled:opacity-50"
+          >
+            Reenviar convite
+          </button>
+        )}
+      </div>
+      {result && (
+        <p className={`mt-3 text-xs ${result.ok ? "text-emerald-400" : "text-destructive"}`}>{result.message}</p>
+      )}
+      {lastSentAt && (
+        <p className="mt-1 text-xs text-white/40">
+          Último envio: {new Date(lastSentAt).toLocaleString("pt-BR")}
+          {result?.expires_at ? ` · acesso até ${new Date(result.expires_at).toLocaleDateString("pt-BR")}` : ""}
+        </p>
+      )}
+    </div>
+  );
+}
+
+
 function SubscribersPanel() {
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<ProfileRow[]>([]);
