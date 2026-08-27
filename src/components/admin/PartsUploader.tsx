@@ -318,23 +318,32 @@ export function PartsUploader() {
               </p>
 
               {slot.status !== "published" && (
-                <input
-                  type="file"
-                  accept="video/mp4,video/webm"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) pickFile(ep, f);
-                    e.target.value = "";
-                  }}
-                  className="mt-3 w-full text-xs text-white/70"
-                />
+                <label className="mt-3 inline-flex cursor-pointer items-center gap-1 rounded-md glass px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                  <FolderOpen className="h-3.5 w-3.5" /> Selecionar vídeo
+                  <input
+                    type="file"
+                    accept={ACCEPT}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) pickFile(ep, f);
+                      e.target.value = "";
+                    }}
+                    className="sr-only"
+                  />
+                </label>
               )}
 
-              {slot.file && (
-                <p className="mt-2 truncate text-[11px] text-white/60">
+              {slot.file ? (
+                <p className="mt-2 truncate text-[11px] text-white/70">
                   {slot.file.name} · {fmtSize(slot.file.size)}
                 </p>
+              ) : (
+                slot.status !== "published" &&
+                slot.status !== "done" && (
+                  <p className="mt-2 text-[11px] text-white/40">Nenhum arquivo selecionado.</p>
+                )
               )}
+
 
               {(slot.status === "uploading" || slot.status === "preparing") && (
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
