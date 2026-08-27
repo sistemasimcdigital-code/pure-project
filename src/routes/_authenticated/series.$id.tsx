@@ -53,7 +53,7 @@ function SeriesDetail() {
   return (
     <div>
       <div className="relative h-[50vh] min-h-[380px] w-full overflow-hidden -mt-16">
-        {series.backdrop_url && <img src={series.backdrop_url} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+        {art.url && <img src={art.url} alt="" className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/70 to-[#09090b]/30" />
         <button onClick={() => nav({ to: "/home" })} className="absolute left-4 top-20 inline-flex items-center gap-1 rounded-full glass px-3 py-1.5 text-xs font-medium hover:bg-white/10">
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar
