@@ -157,8 +157,30 @@ function SeriesPanel({ series, onChange }: { series: Series[]; onChange: (s: Ser
           <input placeholder="Classificação (ex.: 16 anos)" value={form.content_rating} onChange={(e) => setForm({ ...form, content_rating: e.target.value })} className={inputCls} />
           <input placeholder="Idioma original (ex.: Coreano)" value={form.language} onChange={(e) => setForm({ ...form, language: e.target.value })} className={inputCls} />
           <input placeholder="Observação de licença" value={form.license_note} onChange={(e) => setForm({ ...form, license_note: e.target.value })} className={inputCls} />
-          <input placeholder="URL do poster (https)" value={form.poster_url} onChange={(e) => setForm({ ...form, poster_url: e.target.value })} className={`${inputCls} sm:col-span-2`} />
-          <input placeholder="URL do backdrop (https)" value={form.backdrop_url} onChange={(e) => setForm({ ...form, backdrop_url: e.target.value })} className={`${inputCls} sm:col-span-2`} />
+          {(["poster_url", "backdrop_url"] as const).map((field) => (
+            <div key={field} className="grid gap-2 rounded-lg border border-white/10 bg-black/20 p-3 sm:col-span-2">
+              <label className="text-xs font-semibold text-white/70">
+                {field === "poster_url" ? "Poster (capa vertical)" : "Backdrop (imagem de destaque)"}
+              </label>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadArt(field, f);
+                  e.target.value = "";
+                }}
+                className="text-xs text-white/70"
+              />
+              {artBusy === field && (
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${artPct}%` }} />
+                </div>
+              )}
+              {form[field] && <p className="truncate text-[11px] text-white/40">Imagem enviada ✓</p>}
+            </div>
+          ))}
+
           <textarea placeholder="Sinopse" value={form.synopsis} onChange={(e) => setForm({ ...form, synopsis: e.target.value })} className={`${inputCls} sm:col-span-2`} rows={3} />
           <div className="flex flex-wrap gap-4 sm:col-span-2 text-sm">
             <label className="flex items-center gap-2"><input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} /> Destaque na home</label>
