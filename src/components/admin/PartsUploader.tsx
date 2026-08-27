@@ -193,21 +193,31 @@ export function PartsUploader() {
     }
   };
 
-  const uploadPoster = async (file: File, field: "poster_url" | "backdrop_url") => {
-    if (!series) return;
+  const pickArt = (field: "poster_url" | "backdrop_url", file: File) => {
     setError(null);
+    setArtNotice(null);
     if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setError("Use imagens JPG, PNG ou WEBP.");
     if (file.size > 10 * 1024 * 1024) return setError("A imagem deve ter até 10 MB.");
+    setArtFiles((a) => ({ ...a, [field]: file }));
+  };
+
+  const uploadArt = async (field: "poster_url" | "backdrop_url") => {
+    const file = artFiles[field];
+    if (!series || !file) return;
+    setError(null);
+    setArtNotice(null);
     setPosterPct(0);
     try {
-      const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
+      const path = `${field === "poster_url" ? "poster" : "backdrop"}/${safeFileName(file.name)}`;
       await uploadWithProgress("catalog-art", path, file, setPosterPct);
-      // Bucket privado: guarda uma URL assinada, renovada a cada novo envio.
-      const url = await signedArtUrl(path);
-      await supabase
+      // Bucket privado: o banco guarda somente o caminho do objeto.
+      const { error: upErr } = await supabase
         .from("series")
-        .update({ [field]: url } as never)
+        .update({ [field]: path } as never)
         .eq("id", series.id);
+      if (upErr) throw new Error(upErr.message);
+      setArtFiles((a) => ({ ...a, [field]: null }));
+      setArtNotice(field === "poster_url" ? "Capa enviada com sucesso." : "Banner enviado com sucesso.");
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
@@ -215,6 +225,7 @@ export function PartsUploader() {
       setPosterPct(null);
     }
   };
+
 
   const uploading = Object.values(slots).some((s) => s.status === "uploading" || s.status === "preparing");
   const missing = eps.filter((e) => !mediaPath[e.id] || !objectOk[e.id]);
