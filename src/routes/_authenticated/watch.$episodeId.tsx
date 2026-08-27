@@ -5,6 +5,8 @@ import type { Episode, Series } from "@/lib/types";
 import { EPISODE_COLUMNS } from "@/lib/types";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { ArrowLeft, Lock } from "lucide-react";
+import { useSignedCatalogImage } from "@/hooks/useSignedCatalogImage";
+
 
 export const Route = createFileRoute("/_authenticated/watch/$episodeId")({
   component: Watch,
