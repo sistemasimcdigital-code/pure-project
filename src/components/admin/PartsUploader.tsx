@@ -262,40 +262,69 @@ export function PartsUploader() {
           retomada automática em caso de queda de conexão. Limite por arquivo: {fmtSize(MEDIA_SIZE_LIMIT)}.
         </p>
 
-        <div className="mt-4 flex flex-wrap items-center gap-4">
-          <div className="h-24 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black/40">
-            {posterPreview && <img src={posterPreview} alt="Capa da série" className="h-full w-full object-cover" />}
-          </div>
-          <div className="grid flex-1 gap-2">
-            <label className="text-xs font-semibold text-white/70">Capa (poster) — armazenamento privado</label>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadPoster(f, "poster_url");
-                e.target.value = "";
-              }}
-              className="text-xs text-white/70"
-            />
-            <label className="text-xs font-semibold text-white/70">Banner (backdrop) — opcional</label>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadPoster(f, "backdrop_url");
-                e.target.value = "";
-              }}
-              className="text-xs text-white/70"
-            />
-            {posterPct !== null && (
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                <div className="h-full bg-primary transition-all" style={{ width: `${posterPct}%` }} />
-              </div>
-            )}
+        <div className="mt-4 rounded-lg border border-white/10 bg-black/20 p-4">
+          <h3 className="text-sm font-bold">Capa e banner</h3>
+          <div className="mt-3 flex flex-wrap items-start gap-4">
+            <div className="h-36 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black/40">
+              {posterArt.url ? (
+                <img src={posterArt.url} alt="Capa da série" className="h-full w-full object-cover" />
+              ) : (
+                <div className="grid h-full place-items-center px-2 text-center text-[10px] text-white/40">
+                  {posterArt.loading ? "Carregando…" : "sem capa"}
+                </div>
+              )}
+            </div>
+            <div className="grid flex-1 gap-3">
+              <p className={`text-xs font-semibold ${posterArt.url ? "text-primary" : "text-destructive"}`}>
+                {posterArt.url ? "Capa configurada" : "Capa não encontrada — selecione uma nova imagem"}
+              </p>
+              {(["poster_url", "backdrop_url"] as const).map((field) => (
+                <div key={field} className="grid gap-2">
+                  <span className="text-xs text-white/70">
+                    {field === "poster_url" ? "Capa (poster) — JPG, PNG ou WebP até 10 MB" : "Banner (backdrop) — opcional"}
+                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-1 rounded-md glass px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                      <FolderOpen className="h-3.5 w-3.5" />
+                      {field === "poster_url" ? "Selecionar capa" : "Selecionar banner"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) pickArt(field, f);
+                          e.target.value = "";
+                        }}
+                        className="sr-only"
+                      />
+                    </label>
+                    <button
+                      onClick={() => uploadArt(field)}
+                      disabled={!artFiles[field] || posterPct !== null}
+                      className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-bold disabled:opacity-40"
+                    >
+                      <Upload className="h-3.5 w-3.5" /> {field === "poster_url" ? "Enviar capa" : "Enviar banner"}
+                    </button>
+                    <span className="truncate text-[11px] text-white/60">
+                      {artFiles[field]
+                        ? `${artFiles[field]!.name} · ${fmtSize(artFiles[field]!.size)}`
+                        : field === "backdrop_url" && backdropArt.url
+                          ? "Banner configurado"
+                          : "Nenhum arquivo selecionado."}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {posterPct !== null && (
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${posterPct}%` }} />
+                </div>
+              )}
+              {artNotice && <p className="text-xs text-primary">{artNotice}</p>}
+            </div>
           </div>
         </div>
+
         {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
         {notice && <p className="mt-3 text-sm text-primary">{notice}</p>}
       </div>
