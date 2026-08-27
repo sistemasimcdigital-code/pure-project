@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LogOut, Search, ShieldCheck } from "lucide-react";
+import { LogOut, Search, ShieldCheck, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,12 +59,15 @@ export function AppHeader() {
           <Link to="/search" className="grid h-9 w-9 place-items-center rounded-full text-white/70 hover:text-white">
             <Search className="h-4 w-4" />
           </Link>
+          <Link to="/account" className="hidden items-center gap-1.5 rounded-md glass px-3 py-1.5 text-xs font-semibold text-white/80 hover:text-white sm:inline-flex">
+            <UserRound className="h-3.5 w-3.5" /> Minha conta
+          </Link>
           {isAdmin && (
             <Link to="/admin" className="hidden items-center gap-1.5 rounded-md glass px-3 py-1.5 text-xs font-semibold text-primary sm:inline-flex">
               <ShieldCheck className="h-3.5 w-3.5" /> Admin
             </Link>
           )}
-          <button onClick={signOut} className="grid h-9 w-9 place-items-center rounded-full text-white/70 hover:text-white" title="Sign out">
+          <button onClick={signOut} className="grid h-9 w-9 place-items-center rounded-full text-white/70 hover:text-white" title="Sair">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
