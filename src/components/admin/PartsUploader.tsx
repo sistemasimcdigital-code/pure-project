@@ -120,15 +120,10 @@ export function PartsUploader() {
     load();
   }, [load]);
 
-  // Capa privada: gera uma URL assinada renovada a cada carregamento da página.
-  useEffect(() => {
-    if (!series?.poster_url) return setPosterPreview(null);
-    const path = series.poster_url.startsWith("http") ? null : series.poster_url;
-    if (!path) return setPosterPreview(series.poster_url);
-    signedArtUrl(path)
-      .then(setPosterPreview)
-      .catch(() => setPosterPreview(null));
-  }, [series?.poster_url]);
+  // Capa privada: a URL assinada é gerada na exibição, nunca salva no banco.
+  const posterArt = useSignedCatalogImage(series?.poster_url);
+  const backdropArt = useSignedCatalogImage(series?.backdrop_url);
+
 
   const setSlot = (id: string, patch: Partial<SlotState>) =>
     setSlots((s) => ({ ...s, [id]: { ...(s[id] ?? emptySlot()), ...patch } }));
