@@ -19,6 +19,8 @@ function Watch() {
   const nav = useNavigate();
   const [ep, setEp] = useState<Episode | null>(null);
   const [series, setSeries] = useState<Series | null>(null);
+  const heroArt = useSignedCatalogImage(series?.backdrop_url);
+
   const [next, setNext] = useState<Episode | null>(null);
   const [initial, setInitial] = useState(0);
   const [savedProgress, setSavedProgress] = useState<number | null>(null);
