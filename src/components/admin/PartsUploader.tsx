@@ -55,6 +55,7 @@ export function PartsUploader() {
   const [series, setSeries] = useState<Series | null>(null);
   const [eps, setEps] = useState<Episode[]>([]);
   const [slots, setSlots] = useState<Record<string, SlotState>>({});
+  const [mediaPath, setMediaPath] = useState<Record<string, string | null>>({});
   const [objectOk, setObjectOk] = useState<Record<string, boolean>>({});
   const [posterPct, setPosterPct] = useState<number | null>(null);
   const [posterPreview, setPosterPreview] = useState<string | null>(null);
@@ -78,15 +79,21 @@ export function PartsUploader() {
       .order("episode_number");
     const list = (e as unknown as Episode[]) ?? [];
     setEps(list);
+    const { data: media } = await supabase.rpc("admin_list_episode_media", { _series_id: row.id });
+    const paths: Record<string, string | null> = {};
+    ((media as { episode_id: string; media_path: string | null }[] | null) ?? []).forEach((m) => {
+      paths[m.episode_id] = m.media_path;
+    });
+    setMediaPath(paths);
     setSlots((prev) => {
       const next: Record<string, SlotState> = {};
       for (const ep of list) {
         const existing = prev[ep.id];
         if (existing && (existing.status === "uploading" || existing.status === "preparing")) {
           next[ep.id] = existing;
-        } else if (ep.published && ep.media_path) {
+        } else if (ep.published && paths[ep.id]) {
           next[ep.id] = { ...emptySlot(), status: "published" };
-        } else if (ep.media_path) {
+        } else if (paths[ep.id]) {
           next[ep.id] = { ...emptySlot(), status: "done" };
         } else {
           next[ep.id] = existing?.status === "error" ? existing : emptySlot();
@@ -95,7 +102,10 @@ export function PartsUploader() {
       return next;
     });
     const checks = await Promise.all(
-      list.map(async (ep) => [ep.id, ep.media_path ? await mediaObjectExists(ep.media_path) : false] as const),
+      list.map(async (ep) => {
+        const path = paths[ep.id];
+        return [ep.id, path ? await mediaObjectExists(path) : false] as const;
+      }),
     );
     setObjectOk(Object.fromEntries(checks));
   }, []);
@@ -145,10 +155,10 @@ export function PartsUploader() {
       async (err) => {
         handles.current[ep.id] = null;
         if (err) return setSlot(ep.id, { status: "error", message: err.message });
-        const { error: upErr } = await supabase
-          .from("episodes")
-          .update({ media_path: path, video_url: null })
-          .eq("id", ep.id);
+        const { error: upErr } = await supabase.rpc("admin_set_episode_media", {
+          _episode_id: ep.id,
+          _media_path: path,
+        });
         if (upErr) return setSlot(ep.id, { status: "error", message: upErr.message });
         setSlot(ep.id, { status: "done", pct: 100, file: null, message: null });
         load();
@@ -157,11 +167,12 @@ export function PartsUploader() {
   };
 
   const removeUploaded = async (ep: Episode) => {
-    if (!ep.media_path) return;
+    const path = mediaPath[ep.id];
+    if (!path) return;
     if (!confirm(`Remover o vídeo enviado de "${ep.title}"?`)) return;
     try {
-      await removeMedia(ep.media_path);
-      await supabase.from("episodes").update({ media_path: null, published: false }).eq("id", ep.id);
+      await removeMedia(path);
+      await supabase.rpc("admin_set_episode_media", { _episode_id: ep.id, _media_path: "" });
       setSlot(ep.id, emptySlot());
       load();
     } catch (e) {
@@ -179,7 +190,10 @@ export function PartsUploader() {
       const path = `${field === "poster_url" ? "posters" : "backdrops"}/${safeFileName(file.name)}`;
       await uploadWithProgress("catalog-art", path, file, setPosterPct);
       // Guarda o caminho no banco; a exibição usa URL assinada renovável.
-      await supabase.from("series").update({ [field]: path }).eq("id", series.id);
+      await supabase
+        .from("series")
+        .update({ [field]: path } as never)
+        .eq("id", series.id);
       load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload da imagem.");
@@ -189,7 +203,7 @@ export function PartsUploader() {
   };
 
   const uploading = Object.values(slots).some((s) => s.status === "uploading" || s.status === "preparing");
-  const missing = eps.filter((e) => !e.media_path || !objectOk[e.id]);
+  const missing = eps.filter((e) => !mediaPath[e.id] || !objectOk[e.id]);
   const canPublish =
     !!series && !!series.poster_url && eps.length === 6 && missing.length === 0 && !uploading;
 
@@ -285,8 +299,8 @@ export function PartsUploader() {
               </div>
 
               <p className="mt-2 truncate text-[11px] text-white/40">
-                {ep.media_path
-                  ? `Arquivo no armazenamento: ${ep.media_path}${objectOk[ep.id] ? "" : " (objeto não localizado)"}`
+                {mediaPath[ep.id]
+                  ? `Arquivo no armazenamento: ${mediaPath[ep.id]}${objectOk[ep.id] ? "" : " (objeto não localizado)"}`
                   : `Caminho previsto: ${EXPECTED_PATH[ep.episode_number] ?? "—"}`}
               </p>
 
@@ -337,7 +351,7 @@ export function PartsUploader() {
                     <RotateCcw className="h-3.5 w-3.5" /> Tentar novamente
                   </button>
                 )}
-                {ep.media_path && (
+                {mediaPath[ep.id] && (
                   <button
                     onClick={() => removeUploaded(ep)}
                     className="inline-flex items-center gap-1 rounded-md glass px-3 py-1.5 text-xs font-semibold hover:bg-destructive/20 hover:text-destructive"
