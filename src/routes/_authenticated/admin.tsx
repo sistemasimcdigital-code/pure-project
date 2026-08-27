@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { activateAndInviteSubscriber, type InviteResult } from "@/lib/subscribers.functions";
 import { useEffect, useState } from "react";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAccess } from "@/hooks/useAccess";
 import type { ActivationCode, DramaType, Episode, Season, Series, SubscriptionStatus } from "@/lib/types";
