@@ -458,11 +458,14 @@ function SubscribersPanel() {
 
   return (
     <div className="space-y-4">
+      <InviteSubscriberCard onDone={() => load(q)} />
+
       <div className="rounded-xl glass p-5">
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por e-mail…" className={`w-full ${inputCls}`} />
         <label className="mt-3 block text-xs text-white/50">Expiração ao ativar (opcional)</label>
         <input type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} className={`mt-1 ${inputCls}`} />
       </div>
+
 
       {state === "loading" && <p className="text-sm text-white/50">Carregando assinantes…</p>}
       {state === "error" && <p className="text-sm text-destructive">Erro ao carregar. Tente novamente.</p>}
